@@ -185,17 +185,18 @@ export const exportToWord = (data: RppData) => {
           new Paragraph({text: "Rubrik:", ...BOLD_TEXT}),
           new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
+                columnWidths: [3000, 6000],
                 rows: [
                     new TableRow({
                         children: [
-                            new TableCell({ children: [new Paragraph({text: "Kategori", ...BOLD_TEXT})], verticalAlign: VerticalAlign.CENTER }),
-                            new TableCell({ children: [new Paragraph({text: "Kriteria", ...BOLD_TEXT})], verticalAlign: VerticalAlign.CENTER }),
+                            new TableCell({ children: [new Paragraph({text: "Kategori", ...BOLD_TEXT})], verticalAlign: VerticalAlign.TOP }),
+                            new TableCell({ children: [new Paragraph({text: "Kriteria", ...BOLD_TEXT})], verticalAlign: VerticalAlign.TOP }),
                         ]
                     }),
                     ...assessmentPackage.asesmen_diagnostik.rubrik.map(r => new TableRow({
                         children: [
-                            new TableCell({ children: [new Paragraph(r.kategori)] }),
-                            new TableCell({ children: [new Paragraph({text: r.kriteria, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph(r.kategori)], verticalAlign: VerticalAlign.TOP }),
+                            new TableCell({ children: [new Paragraph({text: r.kriteria, ...JUSTIFIED_ALIGN })], verticalAlign: VerticalAlign.TOP }),
                         ]
                     }))
                 ]

@@ -99,7 +99,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
         {/* B. Identifikasi */}
         <H1>B. Identifikasi</H1>
         <H2>1. Kesiapan Murid (opsional)</H2>
-        <p className="text-slate-700">Murid memiliki pemahaman awal tentang konsep dasar hari akhir dari pelajaran sebelumnya.</p>
+        <p className="text-slate-700 text-justify">Murid memiliki pemahaman awal tentang konsep dasar hari akhir dari pelajaran sebelumnya.</p>
         <H2>2. Dimensi Profil Lulusan</H2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700">
             {DPL_OPTIONS.map(option => (
@@ -125,14 +125,14 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
             ))}
         </div>
         <H2>4. Materi Integrasi KBC</H2>
-        <p className="text-slate-700">Pembelajaran ini mengintegrasikan {lessonDetails.list_kbc_terpilih.join(' dan ')} dengan menekankan bagaimana keimanan pada hari akhir mendorong {lessonDetails.list_dpl_terpilih.join(' dan ')}.</p>
+        <p className="text-slate-700 text-justify">Pembelajaran ini mengintegrasikan {lessonDetails.list_kbc_terpilih.join(' dan ')} dengan menekankan bagaimana keimanan pada hari akhir mendorong {lessonDetails.list_dpl_terpilih.join(' dan ')}.</p>
 
         {/* C. Desain Pembelajaran */}
         <H1>C. Desain Pembelajaran</H1>
         <H2>1. Tujuan Pembelajaran</H2>
         <ul className="space-y-2 list-decimal list-inside text-slate-700">
             {learningObjectives.map(obj => (
-              <li key={obj.id} className="pl-2">
+              <li key={obj.id} className="pl-2 text-justify">
                  <EditableField as="span" initialValue={obj.deskripsi} onSave={(newValue) => onUpdateObjective(obj.id, newValue)} ariaLabel={`Edit deskripsi untuk tujuan pembelajaran ${obj.id}`} />
               </li>
             ))}
@@ -140,7 +140,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
         {referencedCP && (
               <div className="mt-4 p-3 bg-slate-100 border-l-4 border-slate-300 rounded-r-lg">
                   <p className="text-sm text-slate-600 font-semibold">Selaras dengan Capaian Pembelajaran:</p>
-                  <p className="text-base text-slate-700 italic">"{renderSafely(referencedCP)}"</p>
+                  <p className="text-base text-slate-700 italic text-justify">"{renderSafely(referencedCP)}"</p>
               </div>
         )}
         
@@ -163,16 +163,16 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
 
                   <div>
                     <H3>c. Lingkungan Pembelajaran</H3>
-                    <p><BoldText>Lingkungan Fisik:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)}</p>
-                    <p><BoldText>Ruang Virtual:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.ruang_virtual)}</p>
-                    <p><BoldText>Budaya Belajar:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.budaya_belajar)}</p>
+                    <p className="text-justify"><BoldText>Lingkungan Fisik:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)}</p>
+                    <p className="text-justify"><BoldText>Ruang Virtual:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.ruang_virtual)}</p>
+                    <p className="text-justify"><BoldText>Budaya Belajar:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.budaya_belajar)}</p>
                   </div>
                   
                   <div>
                     <H3>d. Pemanfaatan Digital</H3>
-                    <p><BoldText>Video/Animasi (sebagai stimulus):</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.stimulus)}</p>
-                    <p><BoldText>Pencarian Informasi:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pencarian_informasi)}</p>
-                    <p><BoldText>Pembuatan Produk:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pembuatan_produk)}</p>
+                    <p className="text-justify"><BoldText>Video/Animasi (sebagai stimulus):</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.stimulus)}</p>
+                    <p className="text-justify"><BoldText>Pencarian Informasi:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pencarian_informasi)}</p>
+                    <p className="text-justify"><BoldText>Pembuatan Produk:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pembuatan_produk)}</p>
                   </div>
                 </div>
             </>
@@ -185,7 +185,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                 <p className="italic text-slate-600 -mt-2 mb-4">(menggunakan model {lessonDetails.model_pembelajaran})</p>
                 <div className="pl-4">
                   <H2>1. Kegiatan Awal</H2>
-                  <p><BoldText>Apersepsi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_awal.apersepsi} onSave={newValue => onUpdateScenario(['kegiatan_awal', 'apersepsi'], newValue)} ariaLabel="Edit apersepsi"/></p>
+                  <p className="text-justify"><BoldText>Apersepsi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_awal.apersepsi} onSave={newValue => onUpdateScenario(['kegiatan_awal', 'apersepsi'], newValue)} ariaLabel="Edit apersepsi"/></p>
                   <p className="mt-2"><BoldText>Pertanyaan Pemantik:</BoldText></p>
                   <ul className="space-y-2 list-disc list-inside ml-4">
                       {learningScenario.kegiatan_awal.pertanyaan_pemantik?.map((q, i) => (
@@ -200,25 +200,25 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                   <H2>2. Kegiatan Inti (Pembelajaran Mendalam)</H2>
                   <div className="space-y-4">
                       <H3>Tahap 1: Memahami</H3>
-                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.memahami.penjelasan)}</p>
+                      <p className="text-sm text-slate-600 italic text-justify">{renderSafely(learningScenario.kegiatan_inti.memahami.penjelasan)}</p>
                       {learningScenario.kegiatan_inti.memahami.aktivitas?.map((activity, i) => (
-                        <p key={`memahami-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'memahami', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas memahami ${i+1}`}/></p>
+                        <p key={`memahami-${i}`} className="text-justify"><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'memahami', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas memahami ${i+1}`}/></p>
                       ))}
                       <H3>Tahap 2: Mengaplikasi</H3>
-                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.mengaplikasi.penjelasan)}</p>
+                      <p className="text-sm text-slate-600 italic text-justify">{renderSafely(learningScenario.kegiatan_inti.mengaplikasi.penjelasan)}</p>
                       {learningScenario.kegiatan_inti.mengaplikasi.aktivitas?.map((activity, i) => (
-                        <p key={`mengaplikasi-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'mengaplikasi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas mengaplikasi ${i+1}`}/></p>
+                        <p key={`mengaplikasi-${i}`} className="text-justify"><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'mengaplikasi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas mengaplikasi ${i+1}`}/></p>
                       ))}
                       <H3>Tahap 3: Merefleksi</H3>
-                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.merefleksi.penjelasan)}</p>
+                      <p className="text-sm text-slate-600 italic text-justify">{renderSafely(learningScenario.kegiatan_inti.merefleksi.penjelasan)}</p>
                       {learningScenario.kegiatan_inti.merefleksi.aktivitas?.map((activity, i) => (
-                        <p key={`merefleksi-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'merefleksi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas merefleksi ${i+1}`}/></p>
+                        <p key={`merefleksi-${i}`} className="text-justify"><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'merefleksi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas merefleksi ${i+1}`}/></p>
                       ))}
                   </div>
 
                   <H2>3. Kegiatan Penutup</H2>
-                  <p><BoldText>Refleksi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.refleksi} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'refleksi'], newValue)} ariaLabel="Edit refleksi"/></p>
-                  <p><BoldText>Tindak Lanjut:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.tindak_lanjut} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'tindak_lanjut'], newValue)} ariaLabel="Edit tindak lanjut"/></p>
+                  <p className="text-justify"><BoldText>Refleksi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.refleksi} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'refleksi'], newValue)} ariaLabel="Edit refleksi"/></p>
+                  <p className="text-justify"><BoldText>Tindak Lanjut:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.tindak_lanjut} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'tindak_lanjut'], newValue)} ariaLabel="Edit tindak lanjut"/></p>
                 </div>
              </>
         ) : isLoading && !!learningObjectives && <div className="flex items-center mt-6"><Loader large={true}/> <span className="ml-4 text-slate-600">Menghasilkan Skenario Pembelajaran...</span></div>}
@@ -234,21 +234,26 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                     <p><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_diagnostik.instrumen)}</p>
                     <p className="mt-2"><BoldText>Pertanyaan:</BoldText></p>
                     <ul className="list-decimal list-inside space-y-1 ml-4 text-slate-700">
-                        {assessmentPackage.asesmen_diagnostik.pertanyaan?.map((q, i) => <li key={q.id}>
+                        {assessmentPackage.asesmen_diagnostik.pertanyaan?.map((q, i) => <li key={q.id} className="text-justify">
                             <EditableField as="span" initialValue={q.pertanyaan} onSave={newValue => onUpdateAssessment('diagnostik', ['pertanyaan', i, 'pertanyaan'], newValue)} ariaLabel={`Edit pertanyaan diagnostik ${q.id}`}/>
                         </li>)}
                     </ul>
                     <p className="mt-2"><BoldText>Rubrik:</BoldText></p>
                     <div className="border border-slate-200 rounded-lg overflow-hidden mt-1">
-                        <table className="min-w-full divide-y divide-slate-200">
+                        <table className="min-w-full divide-y divide-slate-200 table-fixed">
                             <thead className="bg-slate-50">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kriteria</th>
+                                    <th scope="col" className="w-1/3 px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</th>
+                                    <th scope="col" className="w-2/3 px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kriteria</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-200">
-                                {assessmentPackage.asesmen_diagnostik.rubrik?.map(r => <tr key={r.kategori}><td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 align-top">{renderSafely(r.kategori)}</td><td className="px-6 py-4 text-sm text-slate-500 align-top">{renderSafely(r.kriteria)}</td></tr>)}
+                                {assessmentPackage.asesmen_diagnostik.rubrik?.map(r => (
+                                    <tr key={r.kategori}>
+                                        <td className="px-6 py-4 text-sm font-medium text-slate-900 align-top">{renderSafely(r.kategori)}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-500 align-top text-justify">{renderSafely(r.kriteria)}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -272,10 +277,10 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                                 {assessmentPackage.asesmen_formatif.rubrik?.map(r => (
                                     <tr key={r.aspek}>
                                         <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_4)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_2)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_4)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_3)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_2)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_1)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -288,7 +293,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                     <p><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_sumatif.instrumen)}</p>
                     <p className="mt-2"><BoldText>Pertanyaan:</BoldText></p>
                     <ul className="list-decimal list-inside space-y-1 ml-4 text-slate-700">
-                        {assessmentPackage.asesmen_sumatif.pertanyaan?.map((q, i) => <li key={q.id}>
+                        {assessmentPackage.asesmen_sumatif.pertanyaan?.map((q, i) => <li key={q.id} className="text-justify">
                             <EditableField as="span" initialValue={q.pertanyaan} onSave={newValue => onUpdateAssessment('sumatif', ['pertanyaan', i, 'pertanyaan'], newValue)} ariaLabel={`Edit pertanyaan sumatif ${q.id}`}/>
                         </li>)}
                     </ul>
@@ -307,9 +312,9 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                                 {assessmentPackage.asesmen_sumatif.rubrik_esai?.map(r => (
                                     <tr key={r.aspek}>
                                         <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_5)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
-                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_5)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_3)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(r.skor_1)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -319,7 +324,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
 
                   <div>
                       <H2>4. Validasi Keselarasan Pedagogis</H2>
-                      <p className="text-sm text-slate-600 mb-2">Pemeriksaan mandiri untuk memastikan setiap item asesmen selaras dengan Tujuan Pembelajaran (TP), Panca Cinta (KBC), dan Dimensi Profil Lulusan (DPL).</p>
+                      <p className="text-sm text-slate-600 mb-2 text-justify">Pemeriksaan mandiri untuk memastikan setiap item asesmen selaras dengan Tujuan Pembelajaran (TP), Panca Cinta (KBC), dan Dimensi Profil Lulusan (DPL).</p>
                       <div className="border border-slate-200 rounded-lg overflow-hidden">
                           <table className="min-w-full divide-y divide-slate-200 text-sm">
                               <thead className="bg-slate-50">
@@ -344,7 +349,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                                                   <span key={kbc} className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full mr-1 mb-1">{kbc}</span>
                                               ))}
                                           </td>
-                                          <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(v.catatan_keselarasan)}</td>
+                                          <td className="px-4 py-2 text-slate-600 align-top text-justify">{renderSafely(v.catatan_keselarasan)}</td>
                                       </tr>
                                   ))}
                               </tbody>
