@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { InputForm } from './components/InputForm';
 import { OutputDisplay } from './components/OutputDisplay';
@@ -7,8 +7,7 @@ import { generateTujuanPembelajaran, generateKerangkaPembelajaran, generateSkena
 import { exportToWord } from './utils/exportToWord';
 import type { LessonDetails, LearningObjective, LearningFramework, LearningScenario, AssessmentPackage } from './types';
 
-const App: React.FC = () => {
-  const [lessonDetails, setLessonDetails] = useState<LessonDetails>({
+const initialLessonDetails: LessonDetails = {
     topik: 'Kiamat Sudah Dekat: Siapkan Amal sebagai Bekal',
     mapel: 'Akidah Akhlak',
     kelas: 'IX / Gasal',
@@ -20,7 +19,21 @@ const App: React.FC = () => {
     list_dpl_terpilih: ['Keimanan dan Ketakwaan kepada Tuhan YME', 'Penalaran Kritis'],
     model_pembelajaran: 'Cooperative Learning',
     stimulus_url: '',
+};
+
+const App: React.FC = () => {
+  const [lessonDetails, setLessonDetails] = useState<LessonDetails>(() => {
+      try {
+          const savedDraft = localStorage.getItem('akd_lesson_draft');
+          return savedDraft ? JSON.parse(savedDraft) : initialLessonDetails;
+      } catch (error) {
+          console.error("Gagal memuat draf dari localStorage:", error);
+          return initialLessonDetails;
+      }
   });
+  
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving'>('saved');
+  const saveTimeoutRef = useRef<number | null>(null);
 
   const [learningObjectives, setLearningObjectives] = useState<LearningObjective[] | null>(null);
   const [referencedCP, setReferencedCP] = useState<string | null>(null);
@@ -31,6 +44,40 @@ const App: React.FC = () => {
   const [activeGenerator, setActiveGenerator] = useState<'objectives' | 'scenario' | 'assessment' | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-save lesson details with debouncing
+  useEffect(() => {
+      setSaveStatus('unsaved');
+      if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = window.setTimeout(() => {
+          setSaveStatus('saving');
+          try {
+              localStorage.setItem('akd_lesson_draft', JSON.stringify(lessonDetails));
+              setSaveStatus('saved');
+          } catch (error) {
+              console.error("Gagal menyimpan draf ke localStorage:", error);
+              setSaveStatus('unsaved');
+          }
+      }, 1500); // Debounce time: 1.5 seconds
+  }, [lessonDetails]);
+
+  const handleClearFormAndReset = useCallback(() => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus semua input dan memulai dari awal? Draf yang tersimpan akan dihapus.")) {
+        setIsLoading(false);
+        setError(null);
+        setActiveGenerator(null);
+        setLearningObjectives(null);
+        setReferencedCP(null);
+        setLearningFramework(null);
+        setLearningScenario(null);
+        setAssessmentPackage(null);
+        setLessonDetails(initialLessonDetails);
+        localStorage.removeItem('akd_lesson_draft');
+        setSaveStatus('saved');
+    }
+  }, []);
 
   const handleGenerateObjectives = useCallback(async () => {
     setIsLoading(true);
@@ -138,6 +185,38 @@ const App: React.FC = () => {
     });
   }, [lessonDetails, learningObjectives, learningFramework, learningScenario, assessmentPackage]);
 
+  const handleUpdateObjective = useCallback((id: string, newDeskripsi: string) => {
+    setLearningObjectives(prev => 
+      prev?.map(obj => obj.id === id ? { ...obj, deskripsi: newDeskripsi } : obj) || null
+    );
+  }, []);
+
+  const handleUpdateScenario = useCallback((path: (string | number)[], newValue: string) => {
+      setLearningScenario(prev => {
+          if (!prev) return null;
+          const newScenario = JSON.parse(JSON.stringify(prev));
+          let current: any = newScenario;
+          for (let i = 0; i < path.length - 1; i++) {
+              current = current[path[i]];
+          }
+          current[path[path.length - 1]] = newValue;
+          return newScenario;
+      });
+  }, []);
+
+  const handleUpdateAssessment = useCallback((type: 'diagnostik' | 'sumatif', path: (string | number)[], newValue: string) => {
+      setAssessmentPackage(prev => {
+          if (!prev) return null;
+          const newPackage = JSON.parse(JSON.stringify(prev));
+          let current: any = newPackage[type === 'diagnostik' ? 'asesmen_diagnostik' : 'asesmen_sumatif'];
+          for (let i = 0; i < path.length - 1; i++) {
+              current = current[path[i]];
+          }
+          current[path[path.length - 1]] = newValue;
+          return newPackage;
+      });
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
@@ -148,7 +227,7 @@ const App: React.FC = () => {
             Selamat datang di Asisten Kurikulum Digital. Mulailah dengan mengisi detail pelajaran Anda, lalu hasilkan komponen RPP secara bertahap.
           </p>
           
-          <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 mb-8">
+          <div id="input-form-container" className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 mb-8">
             <InputForm
               lessonDetails={lessonDetails}
               setLessonDetails={setLessonDetails}
@@ -159,6 +238,8 @@ const App: React.FC = () => {
               isScenarioGenerated={!!learningScenario}
               isLoading={isLoading}
               activeGenerator={activeGenerator}
+              saveStatus={saveStatus}
+              onClearForm={handleClearFormAndReset}
             />
           </div>
 
@@ -170,14 +251,17 @@ const App: React.FC = () => {
           )}
 
           <OutputDisplay
+            lessonDetails={lessonDetails}
             learningObjectives={learningObjectives}
             referencedCP={referencedCP}
             learningFramework={learningFramework}
             learningScenario={learningScenario}
             assessmentPackage={assessmentPackage}
             isLoading={isLoading}
-            modelPembelajaran={lessonDetails.model_pembelajaran}
             onExport={handleExportToWord}
+            onUpdateObjective={handleUpdateObjective}
+            onUpdateScenario={handleUpdateScenario}
+            onUpdateAssessment={handleUpdateAssessment}
           />
         </div>
       </main>

@@ -1,364 +1,359 @@
-
 import React from 'react';
-import type { LearningObjective, LearningFramework, LearningScenario, AssessmentPackage } from '../types';
+import type { LessonDetails, LearningObjective, LearningFramework, LearningScenario, AssessmentPackage } from '../types';
 import { Loader } from './Loader';
-import { DownloadIcon } from './icons';
+import { DownloadIcon, PrintIcon, CheckSquareIcon, SquareIcon } from './icons';
+import { EditableField } from './EditableField';
 
 interface OutputDisplayProps {
+  lessonDetails: LessonDetails;
   learningObjectives: LearningObjective[] | null;
   referencedCP: string | null;
   learningFramework: LearningFramework | null;
   learningScenario: LearningScenario | null;
   assessmentPackage: AssessmentPackage | null;
   isLoading: boolean;
-  modelPembelajaran?: string;
   onExport: () => void;
+  onUpdateObjective: (id: string, newDeskripsi: string) => void;
+  onUpdateScenario: (path: (string | number)[], newValue: string) => void;
+  onUpdateAssessment: (type: 'diagnostik' | 'sumatif', path: (string | number)[], newValue: string) => void;
 }
 
-const Section: React.FC<{ title: string; children: React.ReactNode; icon: string; subtitle?: string; }> = ({ title, children, icon, subtitle }) => (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 mb-8">
-        <div className="flex items-start mb-4">
-            <span className="text-3xl mr-3 mt-1">{icon}</span>
-            <div>
-                <h3 className="text-2xl font-bold text-slate-800">{title}</h3>
-                {subtitle && <p className="text-sm text-slate-500 italic">{subtitle}</p>}
-            </div>
-        </div>
-        {children}
-    </div>
-);
+const KBC_OPTIONS = ['Cinta Allah dan Rasul-Nya', 'Cinta Ilmu', 'Cinta Lingkungan', 'Cinta Diri dan Sesama Manusia', 'Cinta Tanah Air'];
+const DPL_OPTIONS = ['Keimanan dan Ketakwaan kepada Tuhan YME', 'Kewargaan', 'Penalaran Kritis', 'Kreativitas', 'Kolaborasi', 'Kemandirian', 'Kesehatan', 'Komunikasi'];
 
+const H1: React.FC<{children: React.ReactNode}> = ({children}) => <h3 className="text-xl font-bold text-slate-800 mt-6 mb-3">{children}</h3>;
+const H2: React.FC<{children: React.ReactNode}> = ({children}) => <h4 className="text-lg font-semibold text-slate-700 mt-4 mb-2">{children}</h4>;
+const H3: React.FC<{children: React.ReactNode}> = ({children}) => <h5 className="text-base font-semibold text-slate-700 mt-3 mb-1">{children}</h5>;
+const BoldText: React.FC<{children: React.ReactNode}> = ({children}) => <span className="font-semibold text-slate-800">{children}</span>;
 
-// Helper to safely render content that might not be a string
-const renderSafely = (content: any): React.ReactNode => {
-  if (typeof content === 'string') {
-    return content;
-  }
-  if (Array.isArray(content)) {
-    return content.map((item, index) => (
-      <span key={index} className="block">{renderSafely(item)}</span>
-    ));
-  }
-  if (content && typeof content === 'object') {
-    return <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(content, null, 2)}</pre>;
-  }
-  return ''; // Render empty string for null, undefined, etc.
+const renderSafely = (content: any): string => {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return content.join(', ');
+  return '';
 };
 
-
 export const OutputDisplay: React.FC<OutputDisplayProps> = ({
+  lessonDetails,
   learningObjectives,
   referencedCP,
   learningFramework,
   learningScenario,
   assessmentPackage,
   isLoading,
-  modelPembelajaran,
   onExport,
+  onUpdateObjective,
+  onUpdateScenario,
+  onUpdateAssessment
 }) => {
-  if (isLoading && !learningObjectives && !learningScenario && !assessmentPackage) {
+  if (isLoading && !learningObjectives) {
       return (
           <div className="flex justify-center items-center p-16">
               <Loader large={true} />
-              <p className="ml-4 text-slate-600">Menghasilkan komponen RPP...</p>
+              <p className="ml-4 text-slate-600">Menghasilkan RPP...</p>
           </div>
       )
   }
 
-  if (!learningObjectives && !learningScenario && !assessmentPackage) {
+  if (!learningObjectives) {
     return (
         <div className="text-center p-10 bg-slate-100/50 rounded-lg border-2 border-dashed border-slate-300">
-            <p className="text-slate-500">Hasil RPP Anda akan muncul di sini.</p>
+            <p className="text-slate-500">Pratinjau RPP Anda akan muncul di sini setelah Anda menekan "Hasilkan Tujuan".</p>
         </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-        {assessmentPackage && (
-            <div className="flex justify-end">
-                <button
-                    onClick={onExport}
-                    className="flex items-center justify-center px-4 py-2 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
-                >
-                    <DownloadIcon />
-                    <span className="ml-2">Ekspor ke Word</span>
-                </button>
-            </div>
+    <div id="rpp-preview-container" className="bg-white p-6 md:p-10 rounded-2xl shadow-lg border border-slate-200 mb-8">
+        <h2 className="text-2xl font-bold text-center text-slate-800 mb-1">RENCANA PELAKSANAAN PEMBELAJARAN</h2>
+        <h2 className="text-2xl font-bold text-center text-slate-800">(MENDALAM BERBASIS CINTA)</h2>
+        <hr className="my-6 border-slate-300"/>
+
+        <div className="flex justify-end gap-2 no-print mb-6">
+            <button
+                onClick={() => window.print()}
+                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+            >
+                <PrintIcon />
+                <span className="ml-2">Cetak RPP</span>
+            </button>
+            <button
+                onClick={onExport}
+                disabled={!assessmentPackage}
+                className="flex items-center justify-center px-4 py-2 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 disabled:bg-slate-300 disabled:cursor-not-allowed"
+            >
+                <DownloadIcon />
+                <span className="ml-2">Ekspor ke Word</span>
+            </button>
+        </div>
+
+        {/* A. Spesifikasi */}
+        <H1>A. Spesifikasi</H1>
+        <div className="text-base grid grid-cols-[180px,10px,1fr] gap-x-2 gap-y-1">
+            <span className="font-medium">1. Madrasah</span> <span>:</span> <span>{lessonDetails.madrasah}</span>
+            <span className="font-medium">2. Mata Pelajaran</span> <span>:</span> <span>{lessonDetails.mapel}</span>
+            <span className="font-medium">3. Kelas / Semester</span> <span>:</span> <span>{lessonDetails.kelas}</span>
+            <span className="font-medium">4. Topik Pembelajaran</span> <span>:</span> <span>{lessonDetails.topik}</span>
+            <span className="font-medium">5. Alokasi Waktu</span> <span>:</span> <span>2 x 45 Menit</span>
+        </div>
+
+        {/* B. Identifikasi */}
+        <H1>B. Identifikasi</H1>
+        <H2>1. Kesiapan Murid (opsional)</H2>
+        <p className="text-slate-700">Murid memiliki pemahaman awal tentang konsep dasar hari akhir dari pelajaran sebelumnya.</p>
+        <H2>2. Dimensi Profil Lulusan</H2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700">
+            {DPL_OPTIONS.map(option => (
+                <div key={option} className="flex items-center">
+                    {lessonDetails.list_dpl_terpilih.includes(option)
+                        ? <CheckSquareIcon className="text-blue-600 mr-2 flex-shrink-0" />
+                        : <SquareIcon className="text-slate-400 mr-2 flex-shrink-0" />
+                    }
+                    <span>{option}</span>
+                </div>
+            ))}
+        </div>
+        <H2>3. Topik Panca Cinta</H2>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700">
+            {KBC_OPTIONS.map(option => (
+                <div key={option} className="flex items-center">
+                    {lessonDetails.list_kbc_terpilih.includes(option)
+                        ? <CheckSquareIcon className="text-blue-600 mr-2 flex-shrink-0" />
+                        : <SquareIcon className="text-slate-400 mr-2 flex-shrink-0" />
+                    }
+                    <span>{option}</span>
+                </div>
+            ))}
+        </div>
+        <H2>4. Materi Integrasi KBC</H2>
+        <p className="text-slate-700">Pembelajaran ini mengintegrasikan {lessonDetails.list_kbc_terpilih.join(' dan ')} dengan menekankan bagaimana keimanan pada hari akhir mendorong {lessonDetails.list_dpl_terpilih.join(' dan ')}.</p>
+
+        {/* C. Desain Pembelajaran */}
+        <H1>C. Desain Pembelajaran</H1>
+        <H2>1. Tujuan Pembelajaran</H2>
+        <ul className="space-y-2 list-decimal list-inside text-slate-700">
+            {learningObjectives.map(obj => (
+              <li key={obj.id} className="pl-2">
+                 <EditableField as="span" initialValue={obj.deskripsi} onSave={(newValue) => onUpdateObjective(obj.id, newValue)} ariaLabel={`Edit deskripsi untuk tujuan pembelajaran ${obj.id}`} />
+              </li>
+            ))}
+        </ul>
+        {referencedCP && (
+              <div className="mt-4 p-3 bg-slate-100 border-l-4 border-slate-300 rounded-r-lg">
+                  <p className="text-sm text-slate-600 font-semibold">Selaras dengan Capaian Pembelajaran:</p>
+                  <p className="text-base text-slate-700 italic">"{renderSafely(referencedCP)}"</p>
+              </div>
+        )}
+        
+        {learningFramework && (
+            <>
+                <H2>2. Kerangka Pembelajaran</H2>
+                <div className="pl-4 space-y-3">
+                  <div>
+                    <H3>a. Praktik Pedagogis</H3>
+                    <p><BoldText>Model Pembelajaran:</BoldText> {renderSafely(learningFramework.praktik_pedagogis.model_pembelajaran)}</p>
+                    <p><BoldText>Metode:</BoldText> {renderSafely(learningFramework.praktik_pedagogis.metode)}</p>
+                  </div>
+
+                  <div>
+                    <H3>b. Kemitraan Pembelajaran (Opsional)</H3>
+                    <ul className="list-disc list-inside ml-4 text-slate-700">
+                        {learningFramework.kemitraan_pembelajaran?.map((item, i) => <li key={i}>{renderSafely(item)}</li>)}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <H3>c. Lingkungan Pembelajaran</H3>
+                    <p><BoldText>Lingkungan Fisik:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)}</p>
+                    <p><BoldText>Ruang Virtual:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.ruang_virtual)}</p>
+                    <p><BoldText>Budaya Belajar:</BoldText> {renderSafely(learningFramework.lingkungan_pembelajaran.budaya_belajar)}</p>
+                  </div>
+                  
+                  <div>
+                    <H3>d. Pemanfaatan Digital</H3>
+                    <p><BoldText>Video/Animasi (sebagai stimulus):</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.stimulus)}</p>
+                    <p><BoldText>Pencarian Informasi:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pencarian_informasi)}</p>
+                    <p><BoldText>Pembuatan Produk:</BoldText> {renderSafely(learningFramework.pemanfaatan_digital.pembuatan_produk)}</p>
+                  </div>
+                </div>
+            </>
         )}
 
-      {learningObjectives && (
-        <Section title="Tujuan Pembelajaran" icon="🎯">
-          <ul className="space-y-3 list-decimal list-inside text-slate-700">
-            {learningObjectives.map(obj => (
-              <li key={obj.id} className="pl-2">{renderSafely(obj.deskripsi)}</li>
-            ))}
-          </ul>
-          {referencedCP && (
-              <div className="mt-4 p-3 bg-slate-100 border-l-4 border-slate-300 rounded-r-lg">
-                  <p className="text-xs text-slate-600 font-semibold">Selaras dengan Capaian Pembelajaran:</p>
-                  <p className="text-sm text-slate-700 italic">"{renderSafely(referencedCP)}"</p>
-              </div>
-          )}
-        </Section>
-      )}
+        {/* D. Pengalaman Belajar */}
+        {learningScenario ? (
+             <>
+                <H1>D. Pengalaman Belajar</H1>
+                <p className="italic text-slate-600 -mt-2 mb-4">(menggunakan model {lessonDetails.model_pembelajaran})</p>
+                <div className="pl-4">
+                  <H2>1. Kegiatan Awal</H2>
+                  <p><BoldText>Apersepsi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_awal.apersepsi} onSave={newValue => onUpdateScenario(['kegiatan_awal', 'apersepsi'], newValue)} ariaLabel="Edit apersepsi"/></p>
+                  <p className="mt-2"><BoldText>Pertanyaan Pemantik:</BoldText></p>
+                  <ul className="space-y-2 list-disc list-inside ml-4">
+                      {learningScenario.kegiatan_awal.pertanyaan_pemantik?.map((q, i) => (
+                          <li key={i} className="text-slate-700">
+                              <EditableField as="span" initialValue={q.pertanyaan} onSave={newValue => onUpdateScenario(['kegiatan_awal', 'pertanyaan_pemantik', i, 'pertanyaan'], newValue)} ariaLabel={`Edit pertanyaan pemantik ${i+1}`}/>
+                              {' '}
+                              <span className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">{renderSafely(q.kaitan_kbc)}</span>
+                          </li>
+                      ))}
+                  </ul>
 
-      {learningFramework && (
-        <Section title="Kerangka Pembelajaran" icon="🏗️">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div>
-                    <h4 className="font-semibold text-slate-800 mb-2">a. Praktik Pedagogis</h4>
-                    <dl className="text-sm space-y-1 pl-4">
-                        <dt className="font-medium text-slate-600">Model Pembelajaran:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.praktik_pedagogis.model_pembelajaran)}</dd>
-                        <dt className="font-medium text-slate-600">Metode:</dt>
-                        <dd className="pl-2 text-slate-700">{learningFramework.praktik_pedagogis.metode.join(', ')}</dd>
-                    </dl>
-                </div>
-                <div>
-                    <h4 className="font-semibold text-slate-800 mb-2">b. Kemitraan Pembelajaran (Opsional)</h4>
-                    <ul className="text-sm list-disc list-inside pl-4 text-slate-700 space-y-1">
-                        {learningFramework.kemitraan_pembelajaran.map((item, i) => <li key={i}>{renderSafely(item)}</li>)}
-                    </ul>
-                </div>
-                <div className="md:col-span-2">
-                    <h4 className="font-semibold text-slate-800 mb-2">c. Lingkungan Pembelajaran</h4>
-                    <dl className="text-sm space-y-1 pl-4">
-                        <dt className="font-medium text-slate-600">Lingkungan Fisik:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)}</dd>
-                        <dt className="font-medium text-slate-600">Ruang Virtual:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.lingkungan_pembelajaran.ruang_virtual)}</dd>
-                        <dt className="font-medium text-slate-600">Budaya Belajar:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.lingkungan_pembelajaran.budaya_belajar)}</dd>
-                    </dl>
-                </div>
-                <div className="md:col-span-2">
-                    <h4 className="font-semibold text-slate-800 mb-2">d. Pemanfaatan Digital</h4>
-                    <dl className="text-sm space-y-1 pl-4">
-                        <dt className="font-medium text-slate-600">Video/Animasi (sebagai stimulus):</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.pemanfaatan_digital.stimulus)}</dd>
-                        <dt className="font-medium text-slate-600">Pencarian Informasi:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.pemanfaatan_digital.pencarian_informasi)}</dd>
-                        <dt className="font-medium text-slate-600">Pembuatan Produk:</dt>
-                        <dd className="pl-2 text-slate-700">{renderSafely(learningFramework.pemanfaatan_digital.pembuatan_produk)}</dd>
-                    </dl>
-                </div>
-            </div>
-        </Section>
-      )}
-
-      {learningScenario && (
-        <Section 
-            title="Pengalaman Belajar" 
-            icon="🎭"
-            subtitle={modelPembelajaran ? `(menggunakan model ${modelPembelajaran})` : ''}
-        >
-            <div className="space-y-6">
-                <div>
-                    <h4 className="text-lg font-semibold text-blue-700 mb-2">Kegiatan Awal</h4>
-                    <p className="text-slate-600 mb-2"><strong className="font-semibold text-slate-800">Apersepsi:</strong> {renderSafely(learningScenario.kegiatan_awal.apersepsi)}</p>
-                    <p className="font-semibold text-slate-800 mb-1">Pertanyaan Pemantik:</p>
-                    <ul className="space-y-2 list-disc list-inside">
-                        {learningScenario.kegiatan_awal.pertanyaan_pemantik.map((q, i) => (
-                            <li key={i} className="text-slate-600 pl-2">{renderSafely(q.pertanyaan)} <span className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">{renderSafely(q.kaitan_kbc)}</span></li>
-                        ))}
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 className="text-lg font-semibold text-green-700 mb-3">Kegiatan Inti (Pembelajaran Mendalam)</h4>
-                    <div className="space-y-6 border-l-2 border-slate-200 pl-4 ml-2">
-                        
-                        <div className="relative">
-                            <div className="absolute -left-[26px] top-1 h-4 w-4 rounded-full bg-green-500 ring-4 ring-white"></div>
-                            <h5 className="font-bold text-slate-800">Tahap 1: Memahami</h5>
-                            <p className="text-sm text-slate-600 italic mt-1 mb-3">{renderSafely(learningScenario.kegiatan_inti.memahami.penjelasan)}</p>
-                            <ul className="space-y-3">
-                                {learningScenario.kegiatan_inti.memahami.aktivitas.map((activity, i) => (
-                                   <li key={`memahami-${i}`}>
-                                        <strong className="font-semibold text-slate-800">{renderSafely(activity.sintaks)}:</strong>
-                                        <p className="text-slate-600 pl-2">{renderSafely(activity.deskripsi)}</p>
-                                   </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute -left-[26px] top-1 h-4 w-4 rounded-full bg-green-500 ring-4 ring-white"></div>
-                            <h5 className="font-bold text-slate-800">Tahap 2: Mengaplikasi</h5>
-                            <p className="text-sm text-slate-600 italic mt-1 mb-3">{renderSafely(learningScenario.kegiatan_inti.mengaplikasi.penjelasan)}</p>
-                            <ul className="space-y-3">
-                                {learningScenario.kegiatan_inti.mengaplikasi.aktivitas.map((activity, i) => (
-                                   <li key={`mengaplikasi-${i}`}>
-                                        <strong className="font-semibold text-slate-800">{renderSafely(activity.sintaks)}:</strong>
-                                        <p className="text-slate-600 pl-2">{renderSafely(activity.deskripsi)}</p>
-                                   </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute -left-[26px] top-1 h-4 w-4 rounded-full bg-green-500 ring-4 ring-white"></div>
-                            <h5 className="font-bold text-slate-800">Tahap 3: Merefleksi</h5>
-                            <p className="text-sm text-slate-600 italic mt-1 mb-3">{renderSafely(learningScenario.kegiatan_inti.merefleksi.penjelasan)}</p>
-                            <ul className="space-y-3">
-                                {learningScenario.kegiatan_inti.merefleksi.aktivitas.map((activity, i) => (
-                                   <li key={`merefleksi-${i}`}>
-                                        <strong className="font-semibold text-slate-800">{renderSafely(activity.sintaks)}:</strong>
-                                        <p className="text-slate-600 pl-2">{renderSafely(activity.deskripsi)}</p>
-                                   </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 className="text-lg font-semibold text-purple-700 mb-2">Kegiatan Penutup</h4>
-                    <p className="text-slate-600 mb-2"><strong className="font-semibold text-slate-800">Refleksi:</strong> {renderSafely(learningScenario.kegiatan_penutup.refleksi)}</p>
-                    <p className="text-slate-600"><strong className="font-semibold text-slate-800">Tindak Lanjut:</strong> {renderSafely(learningScenario.kegiatan_penutup.tindak_lanjut)}</p>
-                </div>
-            </div>
-        </Section>
-      )}
-      
-      {assessmentPackage && (
-        <Section title="Paket Asesmen" icon="📝">
-          <div className="space-y-8">
-            {/* Asesmen Diagnostik */}
-            <div>
-                <h4 className="text-xl font-bold text-slate-700 border-b-2 border-amber-400 pb-2 mb-3">Asesmen Diagnostik</h4>
-                <p className="font-semibold text-slate-800 mb-2">Instrumen: <span className="font-normal">{renderSafely(assessmentPackage.asesmen_diagnostik.instrumen)}</span></p>
-                <p className="font-semibold text-slate-800 mb-1">Pertanyaan:</p>
-                <ul className="list-decimal list-inside space-y-1 mb-3 text-slate-600">
-                    {assessmentPackage.asesmen_diagnostik.pertanyaan.map(q => <li key={q.id}>{renderSafely(q.pertanyaan)}</li>)}
-                </ul>
-                <p className="font-semibold text-slate-800 mb-1">Rubrik:</p>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kriteria</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-200">
-                            {assessmentPackage.asesmen_diagnostik.rubrik.map(r => <tr key={r.kategori}><td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 align-top">{renderSafely(r.kategori)}</td><td className="px-6 py-4 text-sm text-slate-500 align-top">{renderSafely(r.kriteria)}</td></tr>)}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Asesmen Formatif */}
-            <div>
-                <h4 className="text-xl font-bold text-slate-700 border-b-2 border-cyan-400 pb-2 mb-3">Asesmen Formatif</h4>
-                <p className="font-semibold text-slate-800 mb-2">Instrumen: <span className="font-normal">{renderSafely(assessmentPackage.asesmen_formatif.instrumen)}</span></p>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Aspek</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 4 (Sangat Baik)</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 3 (Baik)</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 2 (Cukup)</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 1 (Kurang)</th>
-                            </tr>
-                        </thead>
-                         <tbody className="bg-white divide-y divide-slate-200">
-                            {assessmentPackage.asesmen_formatif.rubrik.map(r => (
-                                <tr key={r.aspek}>
-                                    <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_4)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_2)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Asesmen Sumatif */}
-             <div>
-                <h4 className="text-xl font-bold text-slate-700 border-b-2 border-rose-400 pb-2 mb-3">Asesmen Sumatif</h4>
-                <p className="font-semibold text-slate-800 mb-2">Instrumen: <span className="font-normal">{renderSafely(assessmentPackage.asesmen_sumatif.instrumen)}</span></p>
-                <p className="font-semibold text-slate-800 mb-1">Pertanyaan:</p>
-                <ul className="list-decimal list-inside space-y-1 mb-3 text-slate-600">
-                    {assessmentPackage.asesmen_sumatif.pertanyaan.map(q => <li key={q.id}>{renderSafely(q.pertanyaan)}</li>)}
-                </ul>
-                 <p className="font-semibold text-slate-800 mb-1">Rubrik Esai:</p>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                     <table className="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Aspek</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 5 (Sangat Baik)</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 3 (Cukup)</th>
-                                <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 1 (Kurang)</th>
-                            </tr>
-                        </thead>
-                         <tbody className="bg-white divide-y divide-slate-200">
-                            {assessmentPackage.asesmen_sumatif.rubrik_esai.map(r => (
-                                <tr key={r.aspek}>
-                                    <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_5)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
-                                    <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Validasi Keselarasan */}
-            {assessmentPackage.validasi_keselarasan && (
-              <div>
-                  <h4 className="text-xl font-bold text-slate-700 border-b-2 border-indigo-400 pb-2 mb-3 mt-8 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Validasi Keselarasan Pedagogis
-                  </h4>
-                  <p className="text-sm text-slate-600 mb-4">
-                      AKD telah melakukan pemeriksaan mandiri untuk memastikan setiap item asesmen selaras dengan Tujuan Pembelajaran (TP), Panca Cinta (KBC), dan Dimensi Profil Lulusan (DPL).
-                  </p>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                      <table className="min-w-full divide-y divide-slate-200 text-sm">
-                          <thead className="bg-slate-50">
-                              <tr>
-                                  <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Item Asesmen</th>
-                                  <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">TP Terukur</th>
-                                  <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">KBC / DPL Terukur</th>
-                                  <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Catatan Keselarasan</th>
-                              </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-slate-200">
-                              {assessmentPackage.validasi_keselarasan.map((v, index) => (
-                                  <tr key={index}>
-                                      <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(v.item_asesmen)}</td>
-                                      <td className="px-4 py-2 text-slate-600 align-top">
-                                          {v.tp_terukur.map(tp => (
-                                              <span key={tp} className="inline-block bg-blue-100 text-blue-800 text-xs font-mono px-2 py-1 rounded-full mr-1 mb-1">{tp}</span>
-                                          ))}
-                                      </td>
-                                      <td className="px-4 py-2 text-slate-600 align-top">
-                                          {v.kbc_dpl_terukur.map(kbc => (
-                                              <span key={kbc} className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full mr-1 mb-1">{kbc}</span>
-                                          ))}
-                                      </td>
-                                      <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(v.catatan_keselarasan)}</td>
-                                  </tr>
-                              ))}
-                          </tbody>
-                      </table>
+                  <H2>2. Kegiatan Inti (Pembelajaran Mendalam)</H2>
+                  <div className="space-y-4">
+                      <H3>Tahap 1: Memahami</H3>
+                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.memahami.penjelasan)}</p>
+                      {learningScenario.kegiatan_inti.memahami.aktivitas?.map((activity, i) => (
+                        <p key={`memahami-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'memahami', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas memahami ${i+1}`}/></p>
+                      ))}
+                      <H3>Tahap 2: Mengaplikasi</H3>
+                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.mengaplikasi.penjelasan)}</p>
+                      {learningScenario.kegiatan_inti.mengaplikasi.aktivitas?.map((activity, i) => (
+                        <p key={`mengaplikasi-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'mengaplikasi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas mengaplikasi ${i+1}`}/></p>
+                      ))}
+                      <H3>Tahap 3: Merefleksi</H3>
+                      <p className="text-sm text-slate-600 italic">{renderSafely(learningScenario.kegiatan_inti.merefleksi.penjelasan)}</p>
+                      {learningScenario.kegiatan_inti.merefleksi.aktivitas?.map((activity, i) => (
+                        <p key={`merefleksi-${i}`}><BoldText>{renderSafely(activity.sintaks)}:</BoldText> <EditableField as="span" initialValue={activity.deskripsi} onSave={newValue => onUpdateScenario(['kegiatan_inti', 'merefleksi', 'aktivitas', i, 'deskripsi'], newValue)} ariaLabel={`Edit deskripsi aktivitas merefleksi ${i+1}`}/></p>
+                      ))}
                   </div>
-              </div>
-            )}
-          </div>
-        </Section>
-      )}
+
+                  <H2>3. Kegiatan Penutup</H2>
+                  <p><BoldText>Refleksi:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.refleksi} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'refleksi'], newValue)} ariaLabel="Edit refleksi"/></p>
+                  <p><BoldText>Tindak Lanjut:</BoldText> <EditableField as="span" initialValue={learningScenario.kegiatan_penutup.tindak_lanjut} onSave={newValue => onUpdateScenario(['kegiatan_penutup', 'tindak_lanjut'], newValue)} ariaLabel="Edit tindak lanjut"/></p>
+                </div>
+             </>
+        ) : isLoading && !!learningObjectives && <div className="flex items-center mt-6"><Loader large={true}/> <span className="ml-4 text-slate-600">Menghasilkan Skenario Pembelajaran...</span></div>}
+
+
+        {/* E. Asesmen */}
+        {assessmentPackage ? (
+             <>
+                <H1>E. Asesmen Pembelajaran</H1>
+                <div className="pl-4 space-y-8">
+                  <div>
+                    <H2>1. Asesmen Awal (Diagnostik)</H2>
+                    <p><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_diagnostik.instrumen)}</p>
+                    <p className="mt-2"><BoldText>Pertanyaan:</BoldText></p>
+                    <ul className="list-decimal list-inside space-y-1 ml-4 text-slate-700">
+                        {assessmentPackage.asesmen_diagnostik.pertanyaan?.map((q, i) => <li key={q.id}>
+                            <EditableField as="span" initialValue={q.pertanyaan} onSave={newValue => onUpdateAssessment('diagnostik', ['pertanyaan', i, 'pertanyaan'], newValue)} ariaLabel={`Edit pertanyaan diagnostik ${q.id}`}/>
+                        </li>)}
+                    </ul>
+                    <p className="mt-2"><BoldText>Rubrik:</BoldText></p>
+                    <div className="border border-slate-200 rounded-lg overflow-hidden mt-1">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kategori</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kriteria</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-200">
+                                {assessmentPackage.asesmen_diagnostik.rubrik?.map(r => <tr key={r.kategori}><td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 align-top">{renderSafely(r.kategori)}</td><td className="px-6 py-4 text-sm text-slate-500 align-top">{renderSafely(r.kriteria)}</td></tr>)}
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+
+                  <div>
+                    <H2>2. Asesmen Proses (Formatif)</H2>
+                    <p><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_formatif.instrumen)}</p>
+                    <div className="border border-slate-200 rounded-lg overflow-hidden mt-1">
+                        <table className="min-w-full divide-y divide-slate-200 text-sm">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Aspek</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 4 (Sangat Baik)</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 3 (Baik)</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 2 (Cukup)</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 1 (Kurang)</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-200">
+                                {assessmentPackage.asesmen_formatif.rubrik?.map(r => (
+                                    <tr key={r.aspek}>
+                                        <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_4)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_2)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+
+                  <div>
+                    <H2>3. Asesmen Akhir (Sumatif)</H2>
+                    <p><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_sumatif.instrumen)}</p>
+                    <p className="mt-2"><BoldText>Pertanyaan:</BoldText></p>
+                    <ul className="list-decimal list-inside space-y-1 ml-4 text-slate-700">
+                        {assessmentPackage.asesmen_sumatif.pertanyaan?.map((q, i) => <li key={q.id}>
+                            <EditableField as="span" initialValue={q.pertanyaan} onSave={newValue => onUpdateAssessment('sumatif', ['pertanyaan', i, 'pertanyaan'], newValue)} ariaLabel={`Edit pertanyaan sumatif ${q.id}`}/>
+                        </li>)}
+                    </ul>
+                    <p className="mt-2"><BoldText>Rubrik Esai:</BoldText></p>
+                    <div className="border border-slate-200 rounded-lg overflow-hidden mt-1">
+                        <table className="min-w-full divide-y divide-slate-200 text-sm">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Aspek</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 5 (Sangat Baik)</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 3 (Cukup)</th>
+                                    <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Skor 1 (Kurang)</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-200">
+                                {assessmentPackage.asesmen_sumatif.rubrik_esai?.map(r => (
+                                    <tr key={r.aspek}>
+                                        <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(r.aspek)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_5)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_3)}</td>
+                                        <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(r.skor_1)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+
+                  <div>
+                      <H2>4. Validasi Keselarasan Pedagogis</H2>
+                      <p className="text-sm text-slate-600 mb-2">Pemeriksaan mandiri untuk memastikan setiap item asesmen selaras dengan Tujuan Pembelajaran (TP), Panca Cinta (KBC), dan Dimensi Profil Lulusan (DPL).</p>
+                      <div className="border border-slate-200 rounded-lg overflow-hidden">
+                          <table className="min-w-full divide-y divide-slate-200 text-sm">
+                              <thead className="bg-slate-50">
+                                  <tr>
+                                      <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Item Asesmen</th>
+                                      <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">TP Terukur</th>
+                                      <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">KBC / DPL Terukur</th>
+                                      <th className="px-4 py-2 text-left font-medium text-slate-500 uppercase">Catatan Keselarasan</th>
+                                  </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-slate-200">
+                                  {assessmentPackage.validasi_keselarasan?.map((v, index) => (
+                                      <tr key={index}>
+                                          <td className="px-4 py-2 font-semibold text-slate-800 align-top">{renderSafely(v.item_asesmen)}</td>
+                                          <td className="px-4 py-2 text-slate-600 align-top">
+                                              {v.tp_terukur?.map(tp => (
+                                                  <span key={tp} className="inline-block bg-blue-100 text-blue-800 text-xs font-mono px-2 py-1 rounded-full mr-1 mb-1">{tp}</span>
+                                              ))}
+                                          </td>
+                                          <td className="px-4 py-2 text-slate-600 align-top">
+                                              {v.kbc_dpl_terukur?.map(kbc => (
+                                                  <span key={kbc} className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full mr-1 mb-1">{kbc}</span>
+                                              ))}
+                                          </td>
+                                          <td className="px-4 py-2 text-slate-600 align-top">{renderSafely(v.catatan_keselarasan)}</td>
+                                      </tr>
+                                  ))}
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+                </div>
+             </>
+        ) : isLoading && !!learningScenario && <div className="flex items-center mt-6"><Loader large={true}/> <span className="ml-4 text-slate-600">Menghasilkan Paket Asesmen...</span></div>}
     </div>
   );
 };

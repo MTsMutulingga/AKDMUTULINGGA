@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import type { LessonDetails, LearningObjective, LearningScenario, TujuanPembelajaranResponse, LearningFramework } from '../types';
 
@@ -204,11 +203,25 @@ export async function generatePaketAsesmen(details: { tujuan_pembelajaran: Learn
     \`\`\`
 
     *Logika Anda:*
-    1. Asesmen Diagnostik: Buat 2-3 pertanyaan esai singkat/reflektif yang mengukur pemahaman awal terkait tujuan_pembelajaran DAN list_kbc_terpilih/list_dpl_terpilih. Sertakan rubrik kualitatif sederhana.
-    2. Asesmen Formatif: Buat 1 rubrik untuk produk proses. Rubrik ini HARUS memiliki aspek yang menilai list_kbc_terpilih atau list_dpl_terpilih. Tiru RPP KBC.
-    3. Asesmen Sumatif: Buat 1 rubrik Kinerja atau 2-3 soal Esai Reflektif yang mengukur aplikasi dan refleksi. Tiru RPP KBC. Sertakan rubrik penilaian esai yang detail untuk setiap soal.
-    4. Validasi Keselarasan (Self-Correction): SETELAH membuat draf asesmen, lakukan validasi internal. Untuk SETIAP item asesmen (setiap pertanyaan dan setiap aspek rubrik), buat sebuah objek validasi yang secara eksplisit menghubungkannya ke:
-        a. Satu atau lebih 'id' dari 'tujuan_pembelajaran' yang diukur.
+    1.  **Asesmen Diagnostik**: Buat 2-3 pertanyaan esai singkat/reflektif yang mengukur pemahaman awal terkait tujuan_pembelajaran DAN list_kbc_terpilih/list_dpl_terpilih. Sertakan rubrik kualitatif sederhana.
+    2.  **Asesmen Formatif**: Buat 1 rubrik untuk produk proses. Rubrik ini HARUS memiliki aspek yang menilai list_kbc_terpilih atau list_dpl_terpilih.
+    3.  **Asesmen Sumatif**: Buat 1 rubrik Kinerja atau 2-3 soal Esai Reflektif yang mengukur aplikasi dan refleksi. Sertakan rubrik penilaian esai yang detail untuk setiap soal.
+    4.  **ATURAN PEMBUATAN RUBRIK FORMATIF & SUMATIF (WAJIB DIIKUTI):**
+        *   **Hindari Deskripsi Abstrak**: Jangan gunakan kata-kata yang tidak terukur seperti "baik", "cukup", "kurang", "memuaskan".
+        *   **Fokus pada Bukti Teramati (Observable Evidence)**: Untuk setiap level skor (misal: 4, 3, 2, 1), deskripsikan BUKTI NYATA atau PERILAKU SISWA yang bisa diamati guru. Apa yang siswa *lakukan*, *tulis*, atau *hasilkan* untuk mendapatkan skor tersebut? Deskripsi harus operasional.
+        *   **Contoh Buruk (JANGAN DITIRU)**:
+            *   Aspek: Penalaran Kritis
+            *   Skor 4: "Analisis sangat baik."
+            *   Skor 3: "Analisis baik."
+        *   **Contoh Baik (TIRU LOGIKA INI)**:
+            *   Aspek: Penalaran Kritis
+            *   Skor 4 (Sangat Baik): "Mampu mengidentifikasi **semua** argumen utama, menganalisis kekuatan dan kelemahan masing-masing argumen, dan menarik kesimpulan logis yang didukung **lebih dari dua** bukti relevan."
+            *   Skor 3 (Baik): "Mampu mengidentifikasi **sebagian besar** argumen utama, memberikan analisis sederhana, dan menarik kesimpulan yang didukung **satu atau dua** bukti."
+            *   Skor 2 (Cukup): "Mampu mengidentifikasi **beberapa** argumen utama, namun analisisnya bersifat deskriptif dan kesimpulan kurang didukung bukti."
+            *   Skor 1 (Kurang): "Hanya menyebutkan ulang argumen tanpa analisis atau kesimpulan."
+        *   Terapkan logika ini pada SEMUA ASPEK rubrik formatif dan sumatif.
+    5.  **Validasi Keselarasan (Self-Correction)**: SETELAH membuat draf asesmen, lakukan validasi internal. Untuk SETIAP item asesmen (setiap pertanyaan dan setiap aspek rubrik), buat sebuah objek validasi yang secara eksplisit menghubungkannya ke:
+        a. Satu atau lebih 'id' dari 'tujuan_pembelajaran' yang diukur. **SANGAT PENTING**: Lakukan analisis konten yang cermat pada setiap item asesmen. Pilih \`id\` TP yang PALING RELEVAN dan secara langsung diukur oleh item tersebut. Misalnya, jika sebuah pertanyaan meminta siswa untuk "menganalisis dalil", maka \`tp_terukur\` harus menunjuk ke TP yang mengandung kata kerja "menganalisis" atau sinonimnya.
         b. Satu atau lebih elemen dari 'list_kbc_terpilih' atau 'list_dpl_terpilih' yang dinilai.
         c. Berikan 'catatan_keselarasan' yang jujur. Jika sudah selaras, jelaskan keselarasan tersebut. Jika ada potensi misalignment, tandai dengan jelas (misal: "Perlu Perhatian: Kriteria ini kurang eksplisit mengukur KBC/DPL yang dipilih.").
 

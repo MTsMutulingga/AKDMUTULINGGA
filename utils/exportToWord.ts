@@ -12,6 +12,7 @@ import {
   AlignmentType,
   VerticalAlign,
   UnderlineType,
+  PageOrientation,
 } from 'docx';
 import type {
   LessonDetails,
@@ -33,6 +34,7 @@ const HEADING_1 = { level: HeadingLevel.HEADING_1 };
 const HEADING_2 = { level: HeadingLevel.HEADING_2 };
 const HEADING_3 = { level: HeadingLevel.HEADING_3 };
 const BOLD_TEXT = { bold: true };
+const JUSTIFIED_ALIGN = { alignment: AlignmentType.JUSTIFIED };
 const NO_BORDER = {
     top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
     bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -40,14 +42,8 @@ const NO_BORDER = {
     right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
 };
 
-const createBulletedList = (items: string[]) =>
-  items.map(
-    (item) =>
-      new Paragraph({
-        text: item,
-        bullet: { level: 0 },
-      })
-  );
+const KBC_OPTIONS = ['Cinta Allah dan Rasul-Nya', 'Cinta Ilmu', 'Cinta Lingkungan', 'Cinta Diri dan Sesama Manusia', 'Cinta Tanah Air'];
+const DPL_OPTIONS = ['Keimanan dan Ketakwaan kepada Tuhan YME', 'Kewargaan', 'Penalaran Kritis', 'Kreativitas', 'Kolaborasi', 'Kemandirian', 'Kesehatan', 'Komunikasi'];
 
 const getFormattedDate = (place: string) => {
     const date = new Date();
@@ -71,6 +67,16 @@ export const exportToWord = (data: RppData) => {
     description: 'Rencana Pelaksanaan Pembelajaran yang dihasilkan oleh AKD',
     sections: [
       {
+        properties: {
+            pageSize: {
+                width: 11906, // A4 width in Twips
+                height: 16840, // A4 height in Twips
+                orientation: PageOrientation.PORTRAIT,
+            },
+            page: {
+                margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }, // 1 inch
+            },
+        },
         children: [
             new Paragraph({ text: 'RENCANA PELAKSANAAN PEMBELAJARAN (RPP)', heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
             new Paragraph(''),
@@ -80,7 +86,7 @@ export const exportToWord = (data: RppData) => {
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: NO_BORDER,
-            columnWidths: [2500, 7000],
+            columnWidths: [3000, 6500],
             rows: [
                 new TableRow({ children: [ new TableCell({ children: [new Paragraph('1. Madrasah')] }), new TableCell({ children: [new Paragraph(`: ${lessonDetails.madrasah}`)] }) ]}),
                 new TableRow({ children: [ new TableCell({ children: [new Paragraph('2. Mata Pelajaran')] }), new TableCell({ children: [new Paragraph(`: ${lessonDetails.mapel}`)] }) ]}),
@@ -96,19 +102,33 @@ export const exportToWord = (data: RppData) => {
           new Paragraph({ text: '1. Kesiapan Murid (opsional)', ...HEADING_2 }),
           new Paragraph({
             text: 'Murid memiliki pemahaman awal tentang konsep dasar hari akhir dari pelajaran sebelumnya.',
+            ...JUSTIFIED_ALIGN
           }),
           new Paragraph({ text: '2. Dimensi Profil Lulusan', ...HEADING_2 }),
-          ...createBulletedList(lessonDetails.list_dpl_terpilih),
+          ...DPL_OPTIONS.map(option => new Paragraph({
+              children: [
+                  new TextRun(lessonDetails.list_dpl_terpilih.includes(option) ? '☑ ' : '☐ '),
+                  new TextRun(option)
+              ],
+              indent: { left: 400 }
+          })),
           new Paragraph({ text: '3. Topik Panca Cinta', ...HEADING_2 }),
-          ...createBulletedList(lessonDetails.list_kbc_terpilih),
+          ...KBC_OPTIONS.map(option => new Paragraph({
+              children: [
+                  new TextRun(lessonDetails.list_kbc_terpilih.includes(option) ? '☑ ' : '☐ '),
+                  new TextRun(option)
+              ],
+              indent: { left: 400 }
+          })),
           new Paragraph({ text: '4. Materi Integrasi KBC', ...HEADING_2 }),
-          new Paragraph(
-            `Pembelajaran ini mengintegrasikan ${lessonDetails.list_kbc_terpilih.join(
+          new Paragraph({
+            text: `Pembelajaran ini mengintegrasikan ${lessonDetails.list_kbc_terpilih.join(
               ' dan '
             )} dengan menekankan bagaimana keimanan pada hari akhir mendorong ${lessonDetails.list_dpl_terpilih.join(
               ' dan '
-            )}.`
-          ),
+            )}.`,
+            ...JUSTIFIED_ALIGN
+          }),
           new Paragraph(''),
 
           // C. Desain Pembelajaran
@@ -116,44 +136,44 @@ export const exportToWord = (data: RppData) => {
           new Paragraph({ text: '1. Tujuan Pembelajaran', ...HEADING_2 }),
           ...learningObjectives.map(
             (obj) =>
-              new Paragraph({ text: obj.deskripsi, numbering: { reference: 'default-numbering', level: 0 } })
+              new Paragraph({ text: obj.deskripsi, numbering: { reference: 'default-numbering', level: 0 }, ...JUSTIFIED_ALIGN })
           ),
            new Paragraph({ text: '2. Kerangka Pembelajaran', ...HEADING_2 }),
             new Paragraph({ text: 'a. Praktik Pedagogis', ...HEADING_3 }),
             new Paragraph({ children: [new TextRun({text: "Model Pembelajaran: ", ...BOLD_TEXT}), new TextRun(learningFramework.praktik_pedagogis.model_pembelajaran)] }),
             new Paragraph({ children: [new TextRun({text: "Metode: ", ...BOLD_TEXT}), new TextRun(learningFramework.praktik_pedagogis.metode.join(', '))] }),
             new Paragraph({ text: 'b. Kemitraan Pembelajaran (Opsional)', ...HEADING_3 }),
-            ...createBulletedList(learningFramework.kemitraan_pembelajaran),
+            ...learningFramework.kemitraan_pembelajaran.map(item => new Paragraph({ text: item, bullet: { level: 0 } })),
             new Paragraph({ text: 'c. Lingkungan Pembelajaran', ...HEADING_3 }),
-            new Paragraph({ children: [new TextRun({text: "Lingkungan Fisik: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)] }),
-            new Paragraph({ children: [new TextRun({text: "Ruang Virtual: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.ruang_virtual)] }),
-            new Paragraph({ children: [new TextRun({text: "Budaya Belajar: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.budaya_belajar)] }),
+            new Paragraph({ children: [new TextRun({text: "Lingkungan Fisik: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.lingkungan_fisik)], ...JUSTIFIED_ALIGN }),
+            new Paragraph({ children: [new TextRun({text: "Ruang Virtual: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.ruang_virtual)], ...JUSTIFIED_ALIGN }),
+            new Paragraph({ children: [new TextRun({text: "Budaya Belajar: ", ...BOLD_TEXT}), new TextRun(learningFramework.lingkungan_pembelajaran.budaya_belajar)], ...JUSTIFIED_ALIGN }),
             new Paragraph({ text: 'd. Pemanfaatan Digital', ...HEADING_3 }),
-            new Paragraph({ children: [new TextRun({text: "Video/Animasi: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.stimulus)] }),
-            new Paragraph({ children: [new TextRun({text: "Pencarian Informasi: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.pencarian_informasi)] }),
-            new Paragraph({ children: [new TextRun({text: "Pembuatan Produk: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.pembuatan_produk)] }),
+            new Paragraph({ children: [new TextRun({text: "Video/Animasi: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.stimulus)], ...JUSTIFIED_ALIGN }),
+            new Paragraph({ children: [new TextRun({text: "Pencarian Informasi: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.pencarian_informasi)], ...JUSTIFIED_ALIGN }),
+            new Paragraph({ children: [new TextRun({text: "Pembuatan Produk: ", ...BOLD_TEXT}), new TextRun(learningFramework.pemanfaatan_digital.pembuatan_produk)], ...JUSTIFIED_ALIGN }),
           new Paragraph(''),
           
           // D. Pengalaman Belajar
           new Paragraph({ text: 'D. Pengalaman Belajar', ...HEADING_1 }),
           new Paragraph({ text: `(menggunakan model ${lessonDetails.model_pembelajaran})`}),
           new Paragraph({ text: '1. Kegiatan Awal', ...HEADING_2 }),
-          new Paragraph({ children: [new TextRun({text: "Apersepsi: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_awal.apersepsi)] }),
+          new Paragraph({ children: [new TextRun({text: "Apersepsi: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_awal.apersepsi)], ...JUSTIFIED_ALIGN }),
           new Paragraph({text: "Pertanyaan Pemantik:", ...BOLD_TEXT}),
           ...learningScenario.kegiatan_awal.pertanyaan_pemantik.map(q => new Paragraph({text: `${q.pertanyaan} (${q.kaitan_kbc})`, bullet: { level: 0 }})),
           new Paragraph({ text: '2. Kegiatan Inti', ...HEADING_2 }),
             new Paragraph({text: "Tahap 1: Memahami", ...HEADING_3}),
-            new Paragraph(learningScenario.kegiatan_inti.memahami.penjelasan),
-            ...learningScenario.kegiatan_inti.memahami.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)]})),
+            new Paragraph({...JUSTIFIED_ALIGN, text: learningScenario.kegiatan_inti.memahami.penjelasan}),
+            ...learningScenario.kegiatan_inti.memahami.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)], ...JUSTIFIED_ALIGN})),
             new Paragraph({text: "Tahap 2: Mengaplikasi", ...HEADING_3}),
-            new Paragraph(learningScenario.kegiatan_inti.mengaplikasi.penjelasan),
-            ...learningScenario.kegiatan_inti.mengaplikasi.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)]})),
+            new Paragraph({...JUSTIFIED_ALIGN, text: learningScenario.kegiatan_inti.mengaplikasi.penjelasan}),
+            ...learningScenario.kegiatan_inti.mengaplikasi.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)], ...JUSTIFIED_ALIGN})),
             new Paragraph({text: "Tahap 3: Merefleksi", ...HEADING_3}),
-            new Paragraph(learningScenario.kegiatan_inti.merefleksi.penjelasan),
-            ...learningScenario.kegiatan_inti.merefleksi.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)]})),
+            new Paragraph({...JUSTIFIED_ALIGN, text: learningScenario.kegiatan_inti.merefleksi.penjelasan}),
+            ...learningScenario.kegiatan_inti.merefleksi.aktivitas.map(a => new Paragraph({children: [new TextRun({text: `${a.sintaks}: `, ...BOLD_TEXT}), new TextRun(a.deskripsi)], ...JUSTIFIED_ALIGN})),
           new Paragraph({ text: '3. Kegiatan Penutup', ...HEADING_2 }),
-          new Paragraph({ children: [new TextRun({text: "Refleksi: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_penutup.refleksi)] }),
-          new Paragraph({ children: [new TextRun({text: "Tindak Lanjut: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_penutup.tindak_lanjut)] }),
+          new Paragraph({ children: [new TextRun({text: "Refleksi: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_penutup.refleksi)], ...JUSTIFIED_ALIGN }),
+          new Paragraph({ children: [new TextRun({text: "Tindak Lanjut: ", ...BOLD_TEXT}), new TextRun(learningScenario.kegiatan_penutup.tindak_lanjut)], ...JUSTIFIED_ALIGN }),
           new Paragraph(''),
 
           // E. Asesmen Pembelajaran
@@ -161,7 +181,7 @@ export const exportToWord = (data: RppData) => {
           new Paragraph({ text: '1. Asesmen Awal (Diagnostik)', ...HEADING_2 }),
           new Paragraph({ children: [new TextRun({text: "Instrumen: ", ...BOLD_TEXT}), new TextRun(assessmentPackage.asesmen_diagnostik.instrumen)] }),
           new Paragraph({text: "Pertanyaan:", ...BOLD_TEXT}),
-          ...assessmentPackage.asesmen_diagnostik.pertanyaan.map(q => new Paragraph({text: q.pertanyaan, numbering: { reference: 'default-numbering-2', level: 0 }})),
+          ...assessmentPackage.asesmen_diagnostik.pertanyaan.map(q => new Paragraph({text: q.pertanyaan, numbering: { reference: 'default-numbering-2', level: 0 }, ...JUSTIFIED_ALIGN})),
           new Paragraph({text: "Rubrik:", ...BOLD_TEXT}),
           new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
@@ -175,7 +195,7 @@ export const exportToWord = (data: RppData) => {
                     ...assessmentPackage.asesmen_diagnostik.rubrik.map(r => new TableRow({
                         children: [
                             new TableCell({ children: [new Paragraph(r.kategori)] }),
-                            new TableCell({ children: [new Paragraph(r.kriteria)] }),
+                            new TableCell({ children: [new Paragraph({text: r.kriteria, ...JUSTIFIED_ALIGN })] }),
                         ]
                     }))
                 ]
@@ -198,10 +218,10 @@ export const exportToWord = (data: RppData) => {
                     ...assessmentPackage.asesmen_formatif.rubrik.map(r => new TableRow({
                         children: [
                             new TableCell({ children: [new Paragraph({text: r.aspek, ...BOLD_TEXT})] }),
-                            new TableCell({ children: [new Paragraph(r.skor_4)] }),
-                            new TableCell({ children: [new Paragraph(r.skor_3)] }),
-                            new TableCell({ children: [new Paragraph(r.skor_2)] }),
-                            new TableCell({ children: [new Paragraph(r.skor_1)] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_4, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_3, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_2, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_1, ...JUSTIFIED_ALIGN })] }),
                         ]
                     }))
                 ],
@@ -210,7 +230,7 @@ export const exportToWord = (data: RppData) => {
           new Paragraph({ text: '3. Asesmen Akhir (Sumatif)', ...HEADING_2 }),
           new Paragraph({ children: [new TextRun({text: "Instrumen: ", ...BOLD_TEXT}), new TextRun(assessmentPackage.asesmen_sumatif.instrumen)] }),
           new Paragraph({text: "Pertanyaan:", ...BOLD_TEXT}),
-          ...assessmentPackage.asesmen_sumatif.pertanyaan.map(q => new Paragraph({text: q.pertanyaan, numbering: { reference: 'default-numbering-3', level: 0 }})),
+          ...assessmentPackage.asesmen_sumatif.pertanyaan.map(q => new Paragraph({text: q.pertanyaan, numbering: { reference: 'default-numbering-3', level: 0 }, ...JUSTIFIED_ALIGN})),
            new Table({
                 width: { size: 100, type: WidthType.PERCENTAGE },
                 rows: [
@@ -225,9 +245,9 @@ export const exportToWord = (data: RppData) => {
                      ...assessmentPackage.asesmen_sumatif.rubrik_esai.map(r => new TableRow({
                         children: [
                             new TableCell({ children: [new Paragraph({text: r.aspek, ...BOLD_TEXT})] }),
-                            new TableCell({ children: [new Paragraph(r.skor_5)] }),
-                            new TableCell({ children: [new Paragraph(r.skor_3)] }),
-                            new TableCell({ children: [new Paragraph(r.skor_1)] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_5, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_3, ...JUSTIFIED_ALIGN })] }),
+                            new TableCell({ children: [new Paragraph({text: r.skor_1, ...JUSTIFIED_ALIGN })] }),
                         ]
                     }))
                 ],

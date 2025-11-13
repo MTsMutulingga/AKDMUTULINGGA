@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import type { LessonDetails } from '../types';
 import { Loader } from './Loader';
-import { ArrowRightIcon, CheckIcon } from './icons';
+import { ArrowRightIcon, CheckIcon, TrashIcon } from './icons';
 
 interface InputFormProps {
   lessonDetails: LessonDetails;
@@ -14,6 +14,8 @@ interface InputFormProps {
   isScenarioGenerated: boolean;
   isLoading: boolean;
   activeGenerator: 'objectives' | 'scenario' | 'assessment' | null;
+  saveStatus: 'saved' | 'unsaved' | 'saving';
+  onClearForm: () => void;
 }
 
 const KBC_OPTIONS = ['Cinta Allah dan Rasul-Nya', 'Cinta Ilmu', 'Cinta Lingkungan', 'Cinta Diri dan Sesama Manusia', 'Cinta Tanah Air'];
@@ -26,6 +28,33 @@ const LEARNING_MODELS = [
     { name: 'Discovery Learning', syntax: 'Siswa didorong untuk menemukan prinsip atau konsep sendiri melalui eksplorasi aktif dan penyelidikan yang dipandu guru.' },
 ];
 
+const SaveStatusIndicator: React.FC<{ status: 'saved' | 'unsaved' | 'saving' }> = ({ status }) => {
+  switch (status) {
+    case 'saving':
+      return (
+        <div className="flex items-center text-sm text-slate-500">
+          <Loader className="text-slate-500"/>
+          <span className="ml-2">Menyimpan...</span>
+        </div>
+      );
+    case 'saved':
+      return (
+        <div className="flex items-center text-sm text-green-600">
+          <CheckIcon />
+          <span className="ml-2">Draf disimpan</span>
+        </div>
+      );
+    case 'unsaved':
+       return (
+        <div className="flex items-center text-sm text-yellow-600">
+          <span className="italic">Perubahan belum disimpan</span>
+        </div>
+      );
+    default:
+      return null;
+  }
+};
+
 
 export const InputForm: React.FC<InputFormProps> = ({
   lessonDetails,
@@ -37,6 +66,8 @@ export const InputForm: React.FC<InputFormProps> = ({
   isScenarioGenerated,
   isLoading,
   activeGenerator,
+  saveStatus,
+  onClearForm,
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -153,8 +184,21 @@ export const InputForm: React.FC<InputFormProps> = ({
         </p>
       </div>
 
-      <h2 className="text-2xl font-bold text-slate-800 border-b pb-3 pt-4">2. Hasilkan Komponen RPP</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+      <div className="flex justify-between items-center border-b pb-3 pt-4">
+          <h2 className="text-2xl font-bold text-slate-800">2. Hasilkan Komponen RPP</h2>
+          <div className="flex items-center gap-4">
+              <SaveStatusIndicator status={saveStatus} />
+              <button
+                  onClick={onClearForm}
+                  className="flex items-center text-sm text-red-600 hover:text-red-800 font-semibold transition-colors"
+                  title="Hapus semua isian dan mulai dari awal"
+              >
+                  <TrashIcon />
+                  <span className="ml-1.5">Mulai Ulang</span>
+              </button>
+          </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start pt-4">
         {/* Step 1: Objectives */}
         <div className="flex flex-col items-center space-y-2">
             <button 
