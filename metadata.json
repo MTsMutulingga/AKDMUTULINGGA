@@ -1,0 +1,5 @@
+{
+  "name": "AKD: Asisten Kurikulum Digital",
+  "description": "An AI-powered assistant to help teachers create high-quality, pedagogically-aligned Lesson Plans (RPP) based on the KBC framework. Input your lesson topic and select curriculum goals to generate objectives, activities, and assessments.",
+  "requestFramePermissions": []
+}
