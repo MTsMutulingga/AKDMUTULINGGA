@@ -5,6 +5,7 @@ import { InputForm } from './components/InputForm';
 import { OutputDisplay } from './components/OutputDisplay';
 import { generateTujuanPembelajaran, generateKerangkaPembelajaran, generateSkenarioKegiatan, generatePaketAsesmen } from './services/geminiService';
 import { exportToWord } from './utils/exportToWord';
+import { HeartIcon } from './components/icons';
 import type { LessonDetails, LearningObjective, LearningFramework, LearningScenario, AssessmentPackage } from './types';
 
 const initialLessonDetails: LessonDetails = {
@@ -219,9 +220,9 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col">
       <Header />
-      <main className="container mx-auto p-4 md:p-8">
+      <main className="container mx-auto p-4 md:p-8 flex-grow">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-slate-600 mb-8">
             Selamat datang di Asisten Kurikulum Digital. Mulailah dengan mengisi detail pelajaran Anda, lalu hasilkan komponen RPP secara bertahap.
@@ -265,8 +266,16 @@ const App: React.FC = () => {
           />
         </div>
       </main>
-      <footer className="text-center p-4 text-sm text-slate-500">
-        <p>&copy; {new Date().getFullYear()} Asisten Kurikulum Digital (AKD)</p>
+      <footer className="text-center p-8 text-sm text-slate-500 border-t border-slate-200 mt-auto bg-white">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+          <p>&copy; {new Date().getFullYear()} Asisten Kurikulum Digital (AKD)</p>
+          <div className="flex items-center justify-center gap-1.5 text-slate-600">
+            <span>Dibuat dengan</span>
+            <HeartIcon className="text-red-500 w-5 h-5 fill-current" />
+            <span>oleh</span>
+            <span className="font-bold text-blue-600">Siswogo.</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
