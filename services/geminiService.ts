@@ -1,11 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import type { LessonDetails, LearningObjective, LearningScenario, TujuanPembelajaranResponse, LearningFramework } from '../types';
 
-if (!process.env.API_KEY) {
+if (!process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT') {
   throw new Error("API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT' });
 
 const parseJsonResponse = <T,>(text: string): T => {
   try {
