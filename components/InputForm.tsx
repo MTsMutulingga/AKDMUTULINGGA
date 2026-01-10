@@ -21,6 +21,15 @@ interface InputFormProps {
 const KBC_OPTIONS = ['Cinta Allah dan Rasul-Nya', 'Cinta Ilmu', 'Cinta Lingkungan', 'Cinta Diri dan Sesama Manusia', 'Cinta Tanah Air'];
 const DPL_OPTIONS = ['Keimanan dan Ketakwaan kepada Tuhan YME', 'Kewargaan', 'Penalaran Kritis', 'Kreativitas', 'Kolaborasi', 'Kemandirian', 'Kesehatan', 'Komunikasi'];
 
+const KELAS_OPTIONS = [
+    'VII / Gasal',
+    'VII / Genap',
+    'VIII / Gasal',
+    'VIII / Genap',
+    'IX / Gasal',
+    'IX / Genap'
+];
+
 const LEARNING_MODELS = [
     { name: 'Cooperative Learning', syntax: 'Siswa bekerja dalam kelompok kecil untuk mencapai tujuan bersama, menekankan pembelajaran kolaboratif dan tanggung jawab individu serta kelompok.' },
     { name: 'Problem-Based Learning', syntax: 'Pembelajaran dimulai dengan masalah otentik. Siswa mengidentifikasi apa yang perlu mereka ketahui untuk menyelesaikan masalah tersebut.' },
@@ -105,7 +114,17 @@ export const InputForm: React.FC<InputFormProps> = ({
         </div>
          <div>
           <label htmlFor="kelas" className="block text-sm font-medium text-slate-700 mb-1">Kelas / Semester</label>
-          <input type="text" name="kelas" id="kelas" value={lessonDetails.kelas} onChange={handleInputChange} className="block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+          <select
+            name="kelas"
+            id="kelas"
+            value={lessonDetails.kelas}
+            onChange={handleInputChange}
+            className="block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            {KELAS_OPTIONS.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
         </div>
         <div className="md:col-span-2">
           <label htmlFor="topik" className="block text-sm font-medium text-slate-700 mb-1">Topik Pembelajaran</label>
