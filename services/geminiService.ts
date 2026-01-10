@@ -1,11 +1,6 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { LessonDetails, LearningObjective, LearningScenario, TujuanPembelajaranResponse, LearningFramework } from '../types';
-
-if (!process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT') {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT' });
 
 const parseJsonResponse = <T,>(text: string): T => {
   try {
@@ -16,7 +11,6 @@ const parseJsonResponse = <T,>(text: string): T => {
     throw new Error("Received an invalid JSON response from the API.");
   }
 };
-
 
 const AKD_PROMPT_PREFIX = `
 [PERAN DAN IDENTITAS]
@@ -41,6 +35,7 @@ Pastikan rumusan tujuan merupakan turunan yang logis dari CP fase yang sesuai.
 `;
 
 export async function generateTujuanPembelajaran(details: LessonDetails): Promise<TujuanPembelajaranResponse> {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `
     ${AKD_PROMPT_PREFIX}
 
@@ -72,11 +67,12 @@ export async function generateTujuanPembelajaran(details: LessonDetails): Promis
     }
     \`\`\`
   `;
-  const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
+  const result = await ai.models.generateContent({ model: "gemini-3-flash-preview", contents: prompt });
   return parseJsonResponse<TujuanPembelajaranResponse>(result.text);
 }
 
 export async function generateKerangkaPembelajaran(details: LessonDetails & { tujuan_pembelajaran: LearningObjective[] }): Promise<LearningFramework> {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const stimulusPromptPart = details.stimulus_url
     ? `*   'stimulus': User telah menyediakan tautan video/animasi berikut untuk stimulus: "${details.stimulus_url}". Jelaskan bagaimana guru dapat menggunakan video spesifik dari tautan ini sebagai stimulus awal yang efektif untuk topik '${details.topik}'. Jika tautan tidak valid atau tidak relevan, sarankan jenis video alternatif.`
     : `*   'stimulus': Bagaimana guru bisa menggunakan video/animasi sebagai stimulus awal? Sebutkan jenis video. Contoh: "Guru menggunakan video ilustrasi hari akhir sebagai stimulus."`;
@@ -105,7 +101,7 @@ export async function generateKerangkaPembelajaran(details: LessonDetails & { tu
     4.  **Pemanfaatan Digital**: Berikan contoh-contoh yang SANGAT SPESIFIK dan KONTEKSTUAL dengan topik pelajaran.
         ${stimulusPromptPart}
         *   'pencarian_informasi': Apa yang akan murid cari dan di mana? Contoh: "Murid menggunakan browser untuk mencari artikel, video, atau tafsir Al-Qur'an (Qur'an digital) terkait Hari Akhir..."
-        *   'pembuatan_produk': Aplikasi atau tools apa yang bisa murid gunakan untuk membuat produk belajar? Contoh: "Murid dapat menggunakan aplikasi berbasis digital (misal: Canva) untuk menyajikan hasil penemuan mereka dan dalam mengerjakan tugas membuat poster edukatif/infografis digital tentang hari akhir."
+        *   'pembelajaran_produk': Aplikasi atau tools apa yang bisa murid gunakan untuk membuat produk belajar? Contoh: "Murid dapat menggunakan aplikasi berbasis digital (misal: Canva) untuk menyajikan hasil penemuan mereka dan dalam mengerjakan tugas membuat poster edukatif/infografis digital tentang hari akhir."
 
     *Output WAJIB (Hanya Format JSON, tanpa markdown):*
     \`\`\`json
@@ -130,12 +126,12 @@ export async function generateKerangkaPembelajaran(details: LessonDetails & { tu
     }
     \`\`\`
   `;
-  const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
+  const result = await ai.models.generateContent({ model: "gemini-3-flash-preview", contents: prompt });
   return parseJsonResponse<LearningFramework>(result.text);
 }
 
-
 export async function generateSkenarioKegiatan(details: LessonDetails & { tujuan_pembelajaran: LearningObjective[] }) {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `
     ${AKD_PROMPT_PREFIX}
 
@@ -184,12 +180,12 @@ export async function generateSkenarioKegiatan(details: LessonDetails & { tujuan
     }
     \`\`\`
   `;
-  const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
+  const result = await ai.models.generateContent({ model: "gemini-3-flash-preview", contents: prompt });
   return parseJsonResponse<LearningScenario>(result.text);
 }
 
-
 export async function generatePaketAsesmen(details: { tujuan_pembelajaran: LearningObjective[]; kegiatan_inti: { sintaks: string; deskripsi: string; }[]; list_kbc_terpilih: string[]; list_dpl_terpilih: string[] }) {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const prompt = `
     ${AKD_PROMPT_PREFIX}
 
@@ -240,8 +236,7 @@ export async function generatePaketAsesmen(details: { tujuan_pembelajaran: Learn
     \`\`\`
     `;
 
-    const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
-    // Cast to any first to avoid type conflicts, then to the final type.
+    const result = await ai.models.generateContent({ model: "gemini-3-flash-preview", contents: prompt });
     const parsedResult = parseJsonResponse<any>(result.text);
     return parsedResult;
 }

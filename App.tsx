@@ -26,10 +26,10 @@ const App: React.FC = () => {
   const [lessonDetails, setLessonDetails] = useState<LessonDetails>(() => {
       try {
           const savedDraft = localStorage.getItem('akd_lesson_draft');
-          return savedDraft ? JSON.parse(savedDraft) : initialLessonDetails;
+          return savedDraft ? JSON.parse(savedDraft) : { ...initialLessonDetails };
       } catch (error) {
           console.error("Gagal memuat draf dari localStorage:", error);
-          return initialLessonDetails;
+          return { ...initialLessonDetails };
       }
   });
   
@@ -74,9 +74,12 @@ const App: React.FC = () => {
         setLearningFramework(null);
         setLearningScenario(null);
         setAssessmentPackage(null);
-        setLessonDetails(initialLessonDetails);
+        // Penting: Gunakan spread operator untuk memastikan referensi objek baru
+        setLessonDetails({ ...initialLessonDetails });
         localStorage.removeItem('akd_lesson_draft');
         setSaveStatus('saved');
+        // Scroll ke atas untuk pengalaman pengguna yang lebih baik
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
 
@@ -84,20 +87,18 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setActiveGenerator('objectives');
-    setLearningObjectives(null); // Reset current objectives
+    setLearningObjectives(null); 
     setReferencedCP(null);
-    setLearningFramework(null); // Reset framework
-    setLearningScenario(null); // Reset subsequent steps
+    setLearningFramework(null); 
+    setLearningScenario(null); 
     setAssessmentPackage(null);
 
     try {
-      // Step 1: Generate Objectives
       const objectivesResult = await generateTujuanPembelajaran(lessonDetails);
       const newObjectives = objectivesResult.tujuan_pembelajaran;
       setLearningObjectives(newObjectives);
       setReferencedCP(objectivesResult.ref_cp);
       
-      // Step 2: Automatically generate the framework
       const frameworkResult = await generateKerangkaPembelajaran({
         ...lessonDetails,
         tujuan_pembelajaran: newObjectives,
@@ -122,7 +123,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setActiveGenerator('scenario');
-    setAssessmentPackage(null); // Reset subsequent step
+    setAssessmentPackage(null); 
 
     try {
       const result = await generateSkenarioKegiatan({

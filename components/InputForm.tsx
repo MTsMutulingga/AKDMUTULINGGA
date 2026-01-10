@@ -189,6 +189,7 @@ export const InputForm: React.FC<InputFormProps> = ({
           <div className="flex items-center gap-4">
               <SaveStatusIndicator status={saveStatus} />
               <button
+                  type="button"
                   onClick={onClearForm}
                   className="flex items-center text-sm text-red-600 hover:text-red-800 font-semibold transition-colors"
                   title="Hapus semua isian dan mulai dari awal"
