@@ -35,6 +35,13 @@ const renderSafely = (content: any): string => {
   return '';
 };
 
+const getSignatureDate = (kelas: string) => {
+  const k = kelas.toLowerCase();
+  if (k.includes('gasal')) return '1 Juli 2025';
+  if (k.includes('genap')) return '5 Januari 2026';
+  return '...';
+};
+
 export const OutputDisplay: React.FC<OutputDisplayProps> = ({
   lessonDetails,
   learningObjectives,
@@ -242,6 +249,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
              <>
                 <H1>E. Asesmen Pembelajaran</H1>
                 <div className="pl-4 space-y-8">
+                  {/* ... Asesmen Content ... */}
                   <div>
                     <H2>1. Asesmen Awal (Diagnostik)</H2>
                     <p className="text-left"><BoldText>Instrumen:</BoldText> {renderSafely(assessmentPackage.asesmen_diagnostik.instrumen)}</p>
@@ -372,6 +380,22 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
                 </div>
              </>
         ) : isLoading && !!learningScenario && <div className="flex items-center mt-6"><Loader large={true}/> <span className="ml-4 text-slate-600">Menghasilkan Paket Asesmen...</span></div>}
+
+        {/* Signature Block */}
+        <div className="mt-16 grid grid-cols-2 gap-8 text-center text-slate-800">
+            <div>
+                <p className="mb-1">Mengetahui,</p>
+                <p className="font-medium">Kepala Madrasah</p>
+                <div className="h-24"></div>
+                <p className="font-bold underline uppercase">{lessonDetails.namaKepalaMadrasah}</p>
+            </div>
+            <div>
+                <p className="mb-1">{lessonDetails.tempat}, {getSignatureDate(lessonDetails.kelas)}</p>
+                <p className="font-medium">Guru Mata Pelajaran</p>
+                <div className="h-24"></div>
+                <p className="font-bold underline uppercase">{lessonDetails.namaGuru}</p>
+            </div>
+        </div>
     </div>
   );
 };

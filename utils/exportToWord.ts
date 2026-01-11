@@ -38,6 +38,7 @@ const HEADING_3 = { level: HeadingLevel.HEADING_3 };
 const BOLD_TEXT = { bold: true };
 const JUSTIFIED_ALIGN = { alignment: AlignmentType.JUSTIFIED };
 const LEFT_ALIGN = { alignment: AlignmentType.LEFT };
+const CENTER_ALIGN = { alignment: AlignmentType.CENTER };
 const NO_BORDER = {
     top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
     bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -48,11 +49,11 @@ const NO_BORDER = {
 const KBC_OPTIONS = ['Cinta Allah dan Rasul-Nya', 'Cinta Ilmu', 'Cinta Lingkungan', 'Cinta Diri dan Sesama Manusia', 'Cinta Tanah Air'];
 const DPL_OPTIONS = ['Keimanan dan Ketakwaan kepada Tuhan YME', 'Kewargaan', 'Penalaran Kritis', 'Kreativitas', 'Kolaborasi', 'Kemandirian', 'Kesehatan', 'Komunikasi'];
 
-const getFormattedDate = (place: string) => {
-    const date = new Date();
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    const formattedDate = new Intl.DateTimeFormat('id-ID', options).format(date);
-    return `${place}, ${formattedDate}`;
+const getSignatureDate = (kelas: string) => {
+  const k = kelas.toLowerCase();
+  if (k.includes('gasal')) return '1 Juli 2025';
+  if (k.includes('genap')) return '5 Januari 2026';
+  return '...';
 };
 
 export const exportToWord = (data: RppData) => {
@@ -272,7 +273,7 @@ export const exportToWord = (data: RppData) => {
                     new TableRow({
                         children: [
                             new TableCell({ children: [new Paragraph({text: 'Mengetahui,', alignment: AlignmentType.CENTER })]}),
-                            new TableCell({ children: [new Paragraph({text: getFormattedDate(lessonDetails.tempat), alignment: AlignmentType.CENTER })]}),
+                            new TableCell({ children: [new Paragraph({text: `${lessonDetails.tempat}, ${getSignatureDate(lessonDetails.kelas)}`, alignment: AlignmentType.CENTER })]}),
                         ]
                     }),
                     new TableRow({
@@ -289,8 +290,8 @@ export const exportToWord = (data: RppData) => {
                     }),
                     new TableRow({
                         children: [
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lessonDetails.namaKepalaMadrasah, underline: { type: UnderlineType.SINGLE } })], alignment: AlignmentType.CENTER })]}),
-                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lessonDetails.namaGuru, underline: { type: UnderlineType.SINGLE } })], alignment: AlignmentType.CENTER })]}),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lessonDetails.namaKepalaMadrasah.toUpperCase(), underline: { type: UnderlineType.SINGLE }, ...BOLD_TEXT })], alignment: AlignmentType.CENTER })]}),
+                            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: lessonDetails.namaGuru.toUpperCase(), underline: { type: UnderlineType.SINGLE }, ...BOLD_TEXT })], alignment: AlignmentType.CENTER })]}),
                         ]
                     }),
                 ]
