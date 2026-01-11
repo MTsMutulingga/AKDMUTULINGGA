@@ -94,7 +94,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
             <span className="font-medium">2. Mata Pelajaran</span> <span>:</span> <span>{lessonDetails.mapel}</span>
             <span className="font-medium">3. Kelas / Semester</span> <span>:</span> <span>{lessonDetails.kelas}</span>
             <span className="font-medium">4. Topik Pembelajaran</span> <span>:</span> <span>{lessonDetails.topik}</span>
-            <span className="font-medium">5. Alokasi Waktu</span> <span>:</span> <span>2 x 45 Menit</span>
+            <span className="font-medium">5. Alokasi Waktu</span> <span>:</span> <span>2 x 40 Menit</span>
         </div>
 
         {/* B. Identifikasi */}

@@ -14,12 +14,14 @@ const MODEL_NAME = "gemini-3-flash-preview";
 
 const SYSTEM_INSTRUCTION = `
 [PERAN DAN IDENTITAS]
-Anda adalah "Asisten Kurikulum Digital (AKD)", ahli pedagogi dan perancang kurikulum profesional.
+Anda adalah "Asisten Kurikulum Digital (AKD)", ahli pedagogi dan perancang kurikulum profesional tingkat SMP/MTs.
 
-[STANDAR KUALITAS RPP KBC]
-1. Keterkaitan (Alignment): Tujuan, Kegiatan, dan Asesmen harus terhubung erat.
-2. Integrasi Tema: Nilai Panca Cinta (KBC) dan Profil Lulusan (DPL) harus terjalin secara naratif.
-3. Pembelajaran Mendalam: Alur Memahami, Mengaplikasi, dan Merefleksi.
+[STANDAR KUALITAS RPP KBC & FASE D]
+1. Tingkat Materi: Sesuaikan materi dengan Capaian Pembelajaran (CP) Fase D (untuk SMP/MTs kelas VII, VIII, dan IX).
+2. Alokasi Waktu: Gunakan asumsi 1 JP = 40 Menit (Standar SMP/MTs). Pastikan beban aktivitas masuk akal untuk durasi tersebut.
+3. Keterkaitan (Alignment): Tujuan, Kegiatan, dan Asesmen harus terhubung erat.
+4. Integrasi Tema: Nilai Panca Cinta (KBC) dan Profil Lulusan (DPL) harus terjalin secara naratif.
+5. Pembelajaran Mendalam: Alur Memahami, Mengaplikasi, dan Merefleksi.
 
 [INSTRUKSI OUTPUT]
 - Kembalikan respons dalam format JSON murni.
@@ -35,7 +37,7 @@ export async function generateInitialComponents(details: LessonDetails): Promise
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Buatlah Tujuan Pembelajaran dan Kerangka Pembelajaran (Praktik, Lingkungan, Digital) secara sekaligus untuk detail berikut: ${JSON.stringify(details)}`,
+      contents: `Buatlah Tujuan Pembelajaran Fase D dan Kerangka Pembelajaran (Praktik, Lingkungan, Digital) secara sekaligus untuk detail berikut: ${JSON.stringify(details)}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
@@ -101,15 +103,12 @@ export async function generateInitialComponents(details: LessonDetails): Promise
   }
 }
 
-// Fungsi-fungsi lain tetap ada namun dipanggil secara terpisah setelah komponen awal siap
-// Kita tetap gunakan generateInitialComponents di App.tsx sebagai pengganti pemanggilan berantai
-
 export async function generateSkenarioKegiatan(details: LessonDetails & { tujuan_pembelajaran: LearningObjective[] }): Promise<LearningScenario> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Buat skenario kegiatan (Awal, Inti, Penutup) untuk: ${JSON.stringify(details)}`,
+      contents: `Buat skenario kegiatan Fase D (Awal, Inti, Penutup) dengan durasi 2 x 40 menit untuk: ${JSON.stringify(details)}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
@@ -187,7 +186,7 @@ export async function generatePaketAsesmen(details: {
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Buat paket asesmen lengkap untuk: ${JSON.stringify(details)}`,
+      contents: `Buat paket asesmen lengkap sesuai level Fase D untuk: ${JSON.stringify(details)}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
