@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { InputForm } from './components/InputForm';
 import { OutputDisplay } from './components/OutputDisplay';
-import { generateTujuanPembelajaran, generateKerangkaPembelajaran, generateSkenarioKegiatan, generatePaketAsesmen } from './services/geminiService';
+import { generateInitialComponents, generateSkenarioKegiatan, generatePaketAsesmen } from './services/geminiService';
 import { exportToWord } from './utils/exportToWord';
 import { HeartIcon } from './components/icons';
 import type { LessonDetails, LearningObjective, LearningFramework, LearningScenario, AssessmentPackage } from './types';
@@ -61,7 +61,7 @@ const App: React.FC = () => {
               console.error("Gagal menyimpan draf ke localStorage:", error);
               setSaveStatus('unsaved');
           }
-      }, 1500); // Debounce time: 1.5 seconds
+      }, 1500); 
   }, [lessonDetails]);
 
   const handleClearFormAndReset = useCallback(() => {
@@ -74,11 +74,9 @@ const App: React.FC = () => {
         setLearningFramework(null);
         setLearningScenario(null);
         setAssessmentPackage(null);
-        // Penting: Gunakan spread operator untuk memastikan referensi objek baru
         setLessonDetails({ ...initialLessonDetails });
         localStorage.removeItem('akd_lesson_draft');
         setSaveStatus('saved');
-        // Scroll ke atas untuk pengalaman pengguna yang lebih baik
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
@@ -87,6 +85,8 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setActiveGenerator('objectives');
+    
+    // Reset state sebelumnya
     setLearningObjectives(null); 
     setReferencedCP(null);
     setLearningFramework(null); 
@@ -94,19 +94,16 @@ const App: React.FC = () => {
     setAssessmentPackage(null);
 
     try {
-      const objectivesResult = await generateTujuanPembelajaran(lessonDetails);
-      const newObjectives = objectivesResult.tujuan_pembelajaran;
-      setLearningObjectives(newObjectives);
-      setReferencedCP(objectivesResult.ref_cp);
+      // Menggunakan fungsi tunggal yang jauh lebih efisien
+      const result = await generateInitialComponents(lessonDetails);
       
-      const frameworkResult = await generateKerangkaPembelajaran({
-        ...lessonDetails,
-        tujuan_pembelajaran: newObjectives,
-      });
-      setLearningFramework(frameworkResult);
+      setLearningObjectives(result.tujuan_pembelajaran);
+      setReferencedCP(result.ref_cp);
+      setLearningFramework(result.kerangka);
 
-    } catch (e) {
-      setError('Gagal menghasilkan Tujuan & Kerangka Pembelajaran. Silakan coba lagi.');
+    } catch (e: any) {
+      const msg = e.message || "Unknown error";
+      setError(`Gagal menghasilkan Tujuan & Kerangka: ${msg}. Silakan coba lagi.`);
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -131,8 +128,9 @@ const App: React.FC = () => {
         tujuan_pembelajaran: learningObjectives,
       });
       setLearningScenario(result);
-    } catch (e) {
-      setError('Gagal menghasilkan Skenario Kegiatan. Silakan coba lagi.');
+    } catch (e: any) {
+      const msg = e.message || "Unknown error";
+      setError(`Gagal menghasilkan Skenario Kegiatan: ${msg}. Silakan coba lagi.`);
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -164,9 +162,10 @@ const App: React.FC = () => {
             list_dpl_terpilih: lessonDetails.list_dpl_terpilih,
         });
         setAssessmentPackage(result);
-    } catch (e) {
-        setError('Gagal menghasilkan Paket Asesmen. Silakan coba lagi.');
-        console.error(e);
+    } catch (e: any) {
+      const msg = e.message || "Unknown error";
+      setError(`Gagal menghasilkan Paket Asesmen: ${msg}. Silakan coba lagi.`);
+      console.error(e);
     } finally {
         setIsLoading(false);
         setActiveGenerator(null);
@@ -246,9 +245,16 @@ const App: React.FC = () => {
           </div>
 
           {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-8" role="alert">
-              <p className="font-bold">Terjadi Kesalahan</p>
-              <p>{error}</p>
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-xl shadow-sm mb-8 flex items-start" role="alert">
+              <div className="flex-shrink-0 mt-0.5">
+                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+              </div>
+              <div className="ml-3">
+                <p className="font-bold text-red-800">Terjadi Kesalahan</p>
+                <p className="text-sm opacity-90">{error}</p>
+              </div>
             </div>
           )}
 
