@@ -224,7 +224,8 @@ const App: React.FC = () => {
       <Header />
       <main className="container mx-auto p-4 md:p-8 flex-grow">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-slate-600 mb-8">
+          {/* Menambahkan class no-print agar teks ini tidak ikut dicetak */}
+          <p className="text-center text-slate-600 mb-8 no-print">
             Selamat datang di Asisten Kurikulum Digital. Mulailah dengan mengisi detail pelajaran Anda, lalu hasilkan komponen RPP secara bertahap.
           </p>
           
