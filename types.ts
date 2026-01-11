@@ -21,6 +21,7 @@ export interface LearningObjective {
 export interface TujuanPembelajaranResponse {
   tujuan_pembelajaran: LearningObjective[];
   ref_cp: string;
+  alokasi_waktu: string;
 }
 
 export interface LearningFramework {

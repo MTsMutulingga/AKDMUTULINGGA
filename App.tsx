@@ -38,6 +38,7 @@ const App: React.FC = () => {
 
   const [learningObjectives, setLearningObjectives] = useState<LearningObjective[] | null>(null);
   const [referencedCP, setReferencedCP] = useState<string | null>(null);
+  const [alokasiWaktu, setAlokasiWaktu] = useState<string | null>(null);
   const [learningFramework, setLearningFramework] = useState<LearningFramework | null>(null);
   const [learningScenario, setLearningScenario] = useState<LearningScenario | null>(null);
   const [assessmentPackage, setAssessmentPackage] = useState<AssessmentPackage | null>(null);
@@ -71,6 +72,7 @@ const App: React.FC = () => {
         setActiveGenerator(null);
         setLearningObjectives(null);
         setReferencedCP(null);
+        setAlokasiWaktu(null);
         setLearningFramework(null);
         setLearningScenario(null);
         setAssessmentPackage(null);
@@ -89,6 +91,7 @@ const App: React.FC = () => {
     // Reset state sebelumnya
     setLearningObjectives(null); 
     setReferencedCP(null);
+    setAlokasiWaktu(null);
     setLearningFramework(null); 
     setLearningScenario(null); 
     setAssessmentPackage(null);
@@ -99,6 +102,7 @@ const App: React.FC = () => {
       
       setLearningObjectives(result.tujuan_pembelajaran);
       setReferencedCP(result.ref_cp);
+      setAlokasiWaktu(result.alokasi_waktu);
       setLearningFramework(result.kerangka);
 
     } catch (e: any) {
@@ -126,6 +130,7 @@ const App: React.FC = () => {
       const result = await generateSkenarioKegiatan({
         ...lessonDetails,
         tujuan_pembelajaran: learningObjectives,
+        alokasi_waktu: alokasiWaktu || "2 x 40 Menit"
       });
       setLearningScenario(result);
     } catch (e: any) {
@@ -136,7 +141,7 @@ const App: React.FC = () => {
       setIsLoading(false);
       setActiveGenerator(null);
     }
-  }, [lessonDetails, learningObjectives]);
+  }, [lessonDetails, learningObjectives, alokasiWaktu]);
   
   const handleGenerateAssessments = useCallback(async () => {
     if (!learningObjectives || !learningScenario) {
@@ -180,11 +185,12 @@ const App: React.FC = () => {
     exportToWord({
         lessonDetails,
         learningObjectives,
+        alokasiWaktu: alokasiWaktu || "2 x 40 Menit",
         learningFramework,
         learningScenario,
         assessmentPackage,
     });
-  }, [lessonDetails, learningObjectives, learningFramework, learningScenario, assessmentPackage]);
+  }, [lessonDetails, learningObjectives, alokasiWaktu, learningFramework, learningScenario, assessmentPackage]);
 
   const handleUpdateObjective = useCallback((id: string, newDeskripsi: string) => {
     setLearningObjectives(prev => 
@@ -263,6 +269,8 @@ const App: React.FC = () => {
             lessonDetails={lessonDetails}
             learningObjectives={learningObjectives}
             referencedCP={referencedCP}
+            alokasiWaktu={alokasiWaktu}
+            setAlokasiWaktu={setAlokasiWaktu}
             learningFramework={learningFramework}
             learningScenario={learningScenario}
             assessmentPackage={assessmentPackage}

@@ -17,8 +17,8 @@ const SYSTEM_INSTRUCTION = `
 Anda adalah "Asisten Kurikulum Digital (AKD)", ahli pedagogi dan perancang kurikulum profesional tingkat SMP/MTs.
 
 [STANDAR KUALITAS RPP KBC & FASE D]
-1. Tingkat Materi: Sesuaikan materi dengan Capaian Pembelajaran (CP) Fase D (untuk SMP/MTs kelas VII, VIII, dan IX).
-2. Alokasi Waktu: Gunakan asumsi 1 JP = 40 Menit (Standar SMP/MTs). Pastikan beban aktivitas masuk akal untuk durasi tersebut.
+1. Tingkat Materi: Sesuaikan materi secara mendalam dengan Capaian Pembelajaran (CP) Fase D (untuk SMP/MTs kelas VII, VIII, dan IX).
+2. Prediksi Alokasi Waktu: Jangan menggunakan template kaku. Sebagai guru ahli, analisislah keluasan topik dan kompleksitas aktivitas yang Anda rancang. Tentukan jumlah JP yang logis (misal: "3 JP (3 x 40 Menit)" atau "Pertemuan 1 (2 x 40 Menit)"). Asumsi dasar: 1 JP = 40 Menit.
 3. Keterkaitan (Alignment): Tujuan, Kegiatan, dan Asesmen harus terhubung erat.
 4. Integrasi Tema: Nilai Panca Cinta (KBC) dan Profil Lulusan (DPL) harus terjalin secara naratif.
 5. Pembelajaran Mendalam: Alur Memahami, Mengaplikasi, dan Merefleksi.
@@ -37,7 +37,7 @@ export async function generateInitialComponents(details: LessonDetails): Promise
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Buatlah Tujuan Pembelajaran Fase D dan Kerangka Pembelajaran (Praktik, Lingkungan, Digital) secara sekaligus untuk detail berikut: ${JSON.stringify(details)}`,
+      contents: `Buatlah Tujuan Pembelajaran Fase D, Prediksi Alokasi Waktu yang Logis, dan Kerangka Pembelajaran (Praktik, Lingkungan, Digital) secara sekaligus untuk detail berikut: ${JSON.stringify(details)}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",
@@ -56,6 +56,10 @@ export async function generateInitialComponents(details: LessonDetails): Promise
               }
             },
             ref_cp: { type: Type.STRING },
+            alokasi_waktu: { 
+              type: Type.STRING,
+              description: "Prediksi durasi pembelajaran yang dibutuhkan berdasarkan kompleksitas materi (misal: '2 x 40 Menit')"
+            },
             kerangka: {
               type: Type.OBJECT,
               properties: {
@@ -90,7 +94,7 @@ export async function generateInitialComponents(details: LessonDetails): Promise
               required: ["praktik_pedagogis", "kemitraan_pembelajaran", "lingkungan_pembelajaran", "pemanfaatan_digital"]
             }
           },
-          required: ["tujuan_pembelajaran", "ref_cp", "kerangka"]
+          required: ["tujuan_pembelajaran", "ref_cp", "alokasi_waktu", "kerangka"]
         }
       }
     });
@@ -103,12 +107,12 @@ export async function generateInitialComponents(details: LessonDetails): Promise
   }
 }
 
-export async function generateSkenarioKegiatan(details: LessonDetails & { tujuan_pembelajaran: LearningObjective[] }): Promise<LearningScenario> {
+export async function generateSkenarioKegiatan(details: LessonDetails & { tujuan_pembelajaran: LearningObjective[]; alokasi_waktu: string }): Promise<LearningScenario> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   try {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Buat skenario kegiatan Fase D (Awal, Inti, Penutup) dengan durasi 2 x 40 menit untuk: ${JSON.stringify(details)}`,
+      contents: `Buat skenario kegiatan Fase D (Awal, Inti, Penutup) dengan total alokasi waktu ${details.alokasi_waktu} untuk: ${JSON.stringify(details)}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         responseMimeType: "application/json",

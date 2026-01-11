@@ -9,6 +9,8 @@ interface OutputDisplayProps {
   lessonDetails: LessonDetails;
   learningObjectives: LearningObjective[] | null;
   referencedCP: string | null;
+  alokasiWaktu: string | null;
+  setAlokasiWaktu: React.Dispatch<React.SetStateAction<string | null>>;
   learningFramework: LearningFramework | null;
   learningScenario: LearningScenario | null;
   assessmentPackage: AssessmentPackage | null;
@@ -37,6 +39,8 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
   lessonDetails,
   learningObjectives,
   referencedCP,
+  alokasiWaktu,
+  setAlokasiWaktu,
   learningFramework,
   learningScenario,
   assessmentPackage,
@@ -94,7 +98,15 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({
             <span className="font-medium">2. Mata Pelajaran</span> <span>:</span> <span>{lessonDetails.mapel}</span>
             <span className="font-medium">3. Kelas / Semester</span> <span>:</span> <span>{lessonDetails.kelas}</span>
             <span className="font-medium">4. Topik Pembelajaran</span> <span>:</span> <span>{lessonDetails.topik}</span>
-            <span className="font-medium">5. Alokasi Waktu</span> <span>:</span> <span>2 x 40 Menit</span>
+            <span className="font-medium">5. Alokasi Waktu</span> <span>:</span> 
+            <span>
+              <EditableField 
+                as="span" 
+                initialValue={alokasiWaktu || "2 x 40 Menit"} 
+                onSave={(val) => setAlokasiWaktu(val)} 
+                ariaLabel="Edit Alokasi Waktu" 
+              />
+            </span>
         </div>
 
         {/* B. Identifikasi */}

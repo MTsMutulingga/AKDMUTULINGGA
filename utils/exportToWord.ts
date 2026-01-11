@@ -26,6 +26,7 @@ import type {
 interface RppData {
   lessonDetails: LessonDetails;
   learningObjectives: LearningObjective[];
+  alokasiWaktu: string;
   learningFramework: LearningFramework;
   learningScenario: LearningScenario;
   assessmentPackage: AssessmentPackage;
@@ -58,6 +59,7 @@ export const exportToWord = (data: RppData) => {
   const {
     lessonDetails,
     learningObjectives,
+    alokasiWaktu,
     learningFramework,
     learningScenario,
     assessmentPackage,
@@ -95,7 +97,7 @@ export const exportToWord = (data: RppData) => {
                 new TableRow({ children: [ new TableCell({ children: [new Paragraph('2. Mata Pelajaran')] }), new TableCell({ children: [new Paragraph(`: ${lessonDetails.mapel}`)] }) ]}),
                 new TableRow({ children: [ new TableCell({ children: [new Paragraph('3. Kelas / Semester')] }), new TableCell({ children: [new Paragraph(`: ${lessonDetails.kelas}`)] }) ]}),
                 new TableRow({ children: [ new TableCell({ children: [new Paragraph('4. Topik Pembelajaran')] }), new TableCell({ children: [new Paragraph(`: ${lessonDetails.topik}`)] }) ]}),
-                new TableRow({ children: [ new TableCell({ children: [new Paragraph('5. Alokasi Waktu')] }), new TableCell({ children: [new Paragraph(': 2 x 40 Menit')] }) ]}),
+                new TableRow({ children: [ new TableCell({ children: [new Paragraph('5. Alokasi Waktu')] }), new TableCell({ children: [new Paragraph(`: ${alokasiWaktu}`)] }) ]}),
             ],
           }),
           new Paragraph(''),
